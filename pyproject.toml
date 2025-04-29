@@ -17,6 +17,7 @@ dependencies = [
     "pyecharts~=2.0.8",          # Python ECharts wrapper
     "flask-sqlalchemy~=3.1.1",   # Flask DB integration
     "flask-cors~=4.0.1",         # API CORS support
+    "psycopg2~=2.9.10"           # PostgreSQL adapter
 ]
 
 [tool.uv]
