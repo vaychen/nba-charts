@@ -1,6 +1,7 @@
 import logging
 
 import psycopg2
+from pathlib import Path
 from nba_api.stats.library.data import players
 
 
@@ -20,19 +21,9 @@ def main():
     conn = get_db_connection()
 
     # SQL query for batch insert
-    query = """
-        INSERT INTO stats.players (player_index_id, player_index_last_name, player_index_first_name, player_index_full_name, player_index_is_active)
-        VALUES 
-           (%s, %s, %s, %s, %s)
-        ON CONFLICT (player_index_id) 
-        DO UPDATE SET 
-            player_index_last_name = EXCLUDED.player_index_last_name,
-            player_index_first_name = EXCLUDED.player_index_first_name,
-            player_index_full_name = EXCLUDED.player_index_full_name,
-            player_index_is_active = EXCLUDED.player_index_is_active,
-            updated_at = CURRENT_TIMESTAMP
-        ;
-    """
+    sql_file_path = Path(__file__).parent.parent / "database" / "dml" / "players.sql"
+    with open(sql_file_path, "r") as file:
+        query = file.read()
 
     with conn.cursor() as cur:
         try:
