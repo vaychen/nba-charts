@@ -1,5 +1,5 @@
 -- create table players
-create table stats.players (
+create table if not exists stats.players (
     player_index_id int primary key,
     player_index_last_name varchar(256) not null,
     player_index_first_name varchar(256),

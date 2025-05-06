@@ -33,6 +33,7 @@ lint = [
     "pylint~=3.1.0",
     "ruff~=0.4.4",
     "isort~=5.13.2",
+    "sqlfluff~=3.4.0",          # SQL linter
     "mypy~=1.10.0",
 ]
 
