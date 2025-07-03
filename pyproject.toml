@@ -17,7 +17,8 @@ dependencies = [
     "pyecharts~=2.0.8",          # Python ECharts wrapper
     "flask-sqlalchemy~=3.1.1",   # Flask DB integration
     "flask-cors~=4.0.1",         # API CORS support
-    "psycopg2~=2.9.10"           # PostgreSQL adapter
+    "psycopg2~=2.9.10",          # PostgreSQL adapter
+    "matplotlib~=3.9.0",         # Data visualization
 ]
 
 [tool.uv]
@@ -27,6 +28,7 @@ default-groups = ["dev", "lint", "test"]
 [dependency-groups]
 dev = [
     "uvicorn~=0.29.0",           # ASGI server (dev)
+    "seaborn!=0.13.1",          # Statistical data visualization
 ]
 
 lint = [
