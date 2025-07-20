@@ -46,3 +46,12 @@ test = [
     "pytest-cov~=5.0.0",
     "faker~=25.2.0",             # Test data generation
 ]
+api = [
+    "fastapi~=0.111.0",
+    "uvicorn~=0.29.0"
+]
+
+frontend = [
+    "streamlit~=1.47.0",
+    "requests~=2.32.3"
+]
