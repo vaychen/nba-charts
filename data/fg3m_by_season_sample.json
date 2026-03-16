@@ -1,0 +1,11 @@
+[
+  {"season_id": "2000-01", "player_id": 101, "player_name": "Alex A", "avatar_url": "https://example.com/avatars/101.png", "fg3m": 92},
+  {"season_id": "2000-01", "player_id": 102, "player_name": "Blake B", "avatar_url": "https://example.com/avatars/102.png", "fg3m": 110},
+  {"season_id": "2000-01", "player_id": 103, "player_name": "Caro C", "avatar_url": "https://example.com/avatars/103.png", "fg3m": 60},
+  {"season_id": "2001-02", "player_id": 101, "player_name": "Alex A", "avatar_url": "https://example.com/avatars/101.png", "fg3m": 105},
+  {"season_id": "2001-02", "player_id": 102, "player_name": "Blake B", "avatar_url": "https://example.com/avatars/102.png", "fg3m": 112},
+  {"season_id": "2001-02", "player_id": 103, "player_name": "Caro C", "avatar_url": "https://example.com/avatars/103.png", "fg3m": 70},
+  {"season_id": "2002-03", "player_id": 101, "player_name": "Alex A", "avatar_url": "https://example.com/avatars/101.png", "fg3m": 118},
+  {"season_id": "2002-03", "player_id": 102, "player_name": "Blake B", "avatar_url": "https://example.com/avatars/102.png", "fg3m": 115},
+  {"season_id": "2002-03", "player_id": 103, "player_name": "Caro C", "avatar_url": "https://example.com/avatars/103.png", "fg3m": 78}
+]
