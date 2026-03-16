@@ -25,7 +25,7 @@ dependencies = [
 
 [tool.uv]
 # include below dependency groups in the environment as default
-default-groups = ["dev", "lint", "test"]
+default-groups = ["dev", "lint", "test", "api", "frontend"]
 
 [dependency-groups]
 dev = [

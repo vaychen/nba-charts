@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from app.services.nba import generate_shot_chart_image, get_shot_chart_data
 
 app = FastAPI(title="NBA Shot Chart API")
 
@@ -15,6 +17,13 @@ app.add_middleware(
 @app.get("/shot_chart")
 def get_shot_chart(player_id: int, season: str):
     """
-    Placeholder endpoint for shot chart data.
+    Returns shot chart data for a player and season.
     """
-    return {"player_id": player_id, "season": season, "data": "This will be shot chart data."} 
+    data = get_shot_chart_data(player_id, season)
+    return {"player_id": player_id, "season": season, "data": data}
+
+
+@app.get("/shot_chart/image")
+def get_shot_chart_image(player_id: int, season: str):
+    buf = generate_shot_chart_image(player_id, season)
+    return StreamingResponse(buf, media_type="image/png")
