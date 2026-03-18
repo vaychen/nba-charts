@@ -142,3 +142,4 @@ What I need from you
 
 Next steps
 - I will add the doc to the repo as the baseline and then start implementing the MVP according to your chosen path. If you don’t object, I’ll begin with a Dash/Plotly MVP and include a simple local data generator for testing, so you can review the UX quickly.
+
