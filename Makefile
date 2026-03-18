@@ -1,15 +1,46 @@
-.PHONY: update-env env uv-lock jupyter-notebook
+.PHONY: help setup lock format lint test check run-api run-dashboard sync-players sync-teams sync-all clean
 
-# === Python environment ===
-update-env:
-	uv lock --upgrade
-	uv sync
+UV ?= uv
+PYTHON_VERSION := $(strip $(file <.python-version))
 
-uv.lock: pyproject.toml
-	uv lock
+help:
+	@$(UV) run python -c "print('Targets: setup, lock, format, lint, test, check, run-api, run-dashboard, sync-players, sync-teams, sync-all, clean')"
 
-env: uv.lock
-	uv sync
+setup:
+	$(UV) python install $(PYTHON_VERSION)
+	$(UV) sync --all-groups
 
-jupyter-notebook:
-	jupyter notebook
+lock:
+	$(UV) lock
+
+format:
+	$(UV) run ruff format src tests scripts
+
+lint:
+	$(UV) run ruff check src tests scripts
+	$(UV) run mypy src
+
+test:
+	$(UV) run pytest
+
+check:
+	$(UV) run ruff check src tests scripts
+	$(UV) run pytest
+
+run-api:
+	$(UV) run nba-charts-api
+
+run-dashboard:
+	$(UV) run nba-charts-dashboard
+
+sync-players:
+	$(UV) run nba-charts-sync players
+
+sync-teams:
+	$(UV) run nba-charts-sync teams
+
+sync-all:
+	$(UV) run nba-charts-sync all
+
+clean:
+	$(UV) run python scripts/clean.py
