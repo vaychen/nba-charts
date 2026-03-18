@@ -10,9 +10,6 @@ Cross-platform NBA analytics tooling for APIs, ETL jobs, and dynamic chart demos
 - `data/sample` - sample data used for local development and tests.
 - `docs` - refactor plan, dynamic report architecture, and device workflow notes.
 
-## Design
-
-<img src="doc/design_overview.png" alt="Design Overview" style="width:50%;">
 
 ## Local setup
 
