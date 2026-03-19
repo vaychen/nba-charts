@@ -242,7 +242,7 @@ def create_app() -> Dash:
 
 def run() -> None:
     app = create_app()
-    app.run(host=SETTINGS.dashboard_host, port=SETTINGS.dashboard_port, debug=True)
+    app.run(host=SETTINGS.dashboard_host, port=str(SETTINGS.dashboard_port), debug=True)
 
 
 if __name__ == "__main__":

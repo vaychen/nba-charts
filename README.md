@@ -8,6 +8,7 @@ Cross-platform NBA analytics tooling for APIs, ETL jobs, and dynamic chart demos
 - `src/nba_charts/ui` - Dash-based dynamic report demo for season playback.
 - `src/nba_charts/etl` - reference-data sync scripts for players and teams.
 - `data/sample` - sample data used for local development and tests.
+- `data/sample/kobe_career_shoot_made.csv` - Kobe career shot sample used by the first tool-option POC.
 - `docs` - refactor plan, dynamic report architecture, and device workflow notes.
 
 
@@ -33,10 +34,13 @@ The repo tracks the target interpreter in `.python-version`, and the Makefile st
 ```bash
 make run-api
 make run-dashboard
+make run-kobe-shot-poc
 make lint
 make test
 make sync-all
 ```
+
+The Kobe POC runs on `http://127.0.0.1:8051` by default and focuses on the sample shot archive with a Dash + Plotly workflow.
 
 ## Environment configuration
 
@@ -55,3 +59,4 @@ Important variables:
 - `docs/refactor_plan.md`
 - `docs/dynamic_reports.md`
 - `docs/cross_platform_workflow.md`
+- `docs/kobe_shot_poc.md`

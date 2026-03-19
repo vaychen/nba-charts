@@ -30,6 +30,7 @@ uv sync --all-groups
 | Install deps | `make setup` | `uv python install 3.13` then `uv sync --all-groups` |
 | Run API | `make run-api` | `uv run nba-charts-api` |
 | Run dashboard | `make run-dashboard` | `uv run nba-charts-dashboard` |
+| Run Kobe shot POC | `make run-kobe-shot-poc` | `uv run nba-charts-kobe-shot-poc` |
 | Lint | `make lint` | `uv run ruff check src tests scripts` then `uv run mypy src` |
 | Test | `make test` | `uv run pytest` |
 | Sync players | `make sync-players` | `uv run nba-charts-sync players` |

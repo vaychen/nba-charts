@@ -1,10 +1,10 @@
-.PHONY: help setup lock format lint test check run-api run-dashboard sync-players sync-teams sync-all clean
+.PHONY: help setup lock format lint test check run-api run-dashboard run-kobe-shot-poc sync-players sync-teams sync-all clean
 
 UV ?= uv
 PYTHON_VERSION := $(strip $(file <.python-version))
 
 help:
-	@$(UV) run python -c "print('Targets: setup, lock, format, lint, test, check, run-api, run-dashboard, sync-players, sync-teams, sync-all, clean')"
+	@$(UV) run python -c "print('Targets: setup, lock, format, lint, test, check, run-api, run-dashboard, run-kobe-shot-poc, sync-players, sync-teams, sync-all, clean')"
 
 setup:
 	$(UV) python install $(PYTHON_VERSION)
@@ -32,6 +32,9 @@ run-api:
 
 run-dashboard:
 	$(UV) run nba-charts-dashboard
+
+run-kobe-shot-poc:
+	$(UV) run nba-charts-kobe-shot-poc
 
 sync-players:
 	$(UV) run nba-charts-sync players

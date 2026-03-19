@@ -30,6 +30,7 @@ class Settings:
     db_user: str
     db_password: str
     sample_fg3m_path: Path
+    sample_kobe_shot_path: Path
 
     @property
     def database_dsn(self) -> str:
@@ -55,6 +56,7 @@ def get_settings() -> Settings:
         db_user=os.getenv("NBA_CHARTS_DB_USER", "postgres"),
         db_password=os.getenv("NBA_CHARTS_DB_PASSWORD", "postgres"),
         sample_fg3m_path=ROOT_DIR / "data" / "sample" / "fg3m_by_season_sample.json",
+        sample_kobe_shot_path=ROOT_DIR / "data" / "sample" / "kobe_career_shoot_made.csv",
     )
 
 

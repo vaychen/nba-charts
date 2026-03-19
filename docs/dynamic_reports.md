@@ -42,6 +42,7 @@ Time-based reports usually need four things:
 
 - FastAPI for reusable data endpoints
 - Dash for the local dynamic report demo
+- Dash + Plotly now also powers a Kobe shot-archive POC backed by `data/sample/kobe_career_shoot_made.csv`
 - precomputed datasets under `data/processed/` later, sample data for now
 
 ### Long term
