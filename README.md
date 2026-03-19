@@ -53,6 +53,8 @@ make sync-all
 
 The Kobe POC runs on `http://127.0.0.1:8051` by default. With `NBA_CHARTS_KOBE_DATA_SOURCE=auto` or `postgres`, it can read from the local Postgres backend after `make prepare-kobe-backend`, which now also fills `stats.players` and `stats.teams` from `nba_api`.
 
+The ECharts Kobe POC is served by the API at `http://127.0.0.1:8000/echarts/kobe-shot-poc` after `make run-api`.
+
 GitHub Actions now runs lint, type checks, and tests on both macOS and Windows in `.github/workflows/ci.yml`.
 
 ## Environment configuration

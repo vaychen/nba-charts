@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Charts | Kobe Shot POC | ECharts</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --bg-top: #f5ddad;
+      --bg-bottom: #f8f3ea;
+      --card: rgba(255, 249, 237, 0.82);
+      --card-border: rgba(140, 95, 44, 0.16);
+      --text-main: #251c16;
+      --text-muted: #6b5949;
+      --accent: #a35f1b;
+      --accent-deep: #7a4520;
+      --missed: #8b4c39;
+      --shadow: 0 20px 48px rgba(74, 49, 28, 0.1);
+      --display-font: Georgia, "Times New Roman", serif;
+      --body-font: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--body-font);
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at top left, rgba(255, 247, 231, 0.9), transparent 36%),
+        radial-gradient(circle at right 20%, rgba(196, 132, 47, 0.16), transparent 24%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 20px 44px;
+    }
+
+    .hero,
+    .controls,
+    .chart-panel,
+    .trend-panel,
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.8fr);
+      gap: 18px;
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-family: var(--display-font);
+      font-size: clamp(2.3rem, 5vw, 4.2rem);
+      line-height: 1.02;
+    }
+
+    .hero-copy {
+      margin: 0;
+      max-width: 760px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      font-size: 1rem;
+    }
+
+    .hero-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 250, 239, 0.85), rgba(245, 229, 200, 0.7));
+      border: 1px solid rgba(138, 92, 47, 0.14);
+    }
+
+    .backend-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(122, 69, 32, 0.08);
+      color: var(--accent-deep);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .hero-stat-label {
+      margin: 0 0 6px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-stat-value {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 600;
+    }
+
+    .controls {
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .controls-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .season-focus {
+      margin: 0;
+      font-size: 1.22rem;
+      font-weight: 700;
+    }
+
+    .play-button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 18px;
+      background: linear-gradient(135deg, var(--accent-deep), #9b622f);
+      color: #fff7eb;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .season-rail {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .season-slider {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .season-markers {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      gap: 12px;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .control-block label.block-label,
+    .summary-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .choice {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid rgba(138, 92, 47, 0.14);
+      border-radius: 16px;
+      background: rgba(255, 252, 246, 0.9);
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    select,
+    .note {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(138, 92, 47, 0.16);
+      background: rgba(255, 252, 246, 0.94);
+      color: var(--text-main);
+      font-family: inherit;
+    }
+
+    select {
+      min-height: 148px;
+      padding: 10px;
+    }
+
+    .note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric-card {
+      padding: 18px;
+    }
+
+    .metric-card h2 {
+      margin: 0 0 8px;
+      font-family: var(--display-font);
+      font-size: 2rem;
+    }
+
+    .metric-card p {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .metric-title {
+      margin: 0 0 10px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.95fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .chart-panel,
+    .trend-panel {
+      padding: 14px;
+    }
+
+    .chart-title {
+      margin: 0 0 10px;
+      padding: 0 4px;
+      font-size: 1.02rem;
+      font-weight: 700;
+    }
+
+    .chart-box {
+      width: 100%;
+      height: 560px;
+    }
+
+    .chart-box.small {
+      height: 560px;
+    }
+
+    .chart-box.trend {
+      height: 360px;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 248, 234, 0.82);
+      color: var(--text-muted);
+      display: none;
+    }
+
+    .status.error {
+      display: block;
+      background: rgba(139, 76, 57, 0.14);
+      color: #6f3325;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .charts {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-box,
+      .chart-box.small {
+        height: 460px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        padding: 18px 14px 30px;
+      }
+
+      .hero,
+      .controls,
+      .chart-panel,
+      .trend-panel,
+      .metric-card {
+        border-radius: 18px;
+      }
+
+      .chart-box,
+      .chart-box.small {
+        height: 380px;
+      }
+
+      .chart-box.trend {
+        height: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">NBA Charts</p>
+        <h1>Kobe shot archive POC on ECharts</h1>
+        <p class="hero-copy">
+          This browser-first version reuses the shared Kobe shot report API and renders the archive in Apache ECharts.
+          It keeps the same season, playoff, zone, and <code>shot_made_flag</code> controls while shifting the interaction
+          model into a lightweight custom frontend.
+        </p>
+      </div>
+      <aside class="hero-side">
+        <div>
+          <span class="backend-pill" id="backend-pill">Backend: loading</span>
+        </div>
+        <div>
+          <p class="hero-stat-label">Shot archive</p>
+          <p class="hero-stat-value">30,697 rows</p>
+        </div>
+        <div>
+          <p class="hero-stat-label">Known outcomes</p>
+          <p class="hero-stat-value">25,697 rows with `shot_made_flag` 0 or 1</p>
+        </div>
+        <div>
+          <p class="hero-stat-label">View</p>
+          <p class="hero-stat-value" id="frontend-pill">Apache ECharts + FastAPI</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="controls">
+      <div class="controls-top">
+        <div>
+          <p class="eyebrow">Season track</p>
+          <p class="season-focus" id="season-focus">Loading season</p>
+        </div>
+        <button class="play-button" id="play-button" type="button">Play</button>
+      </div>
+
+      <div class="season-rail">
+        <input class="season-slider" id="season-slider" type="range" min="0" max="0" value="0" step="1">
+        <div class="season-markers">
+          <span id="season-start">-</span>
+          <span id="season-current">-</span>
+          <span id="season-end">-</span>
+        </div>
+      </div>
+
+      <div class="control-grid">
+        <div class="control-block">
+          <label class="block-label">View mode</label>
+          <div class="choice-row">
+            <label class="choice"><input type="radio" name="scope-mode" value="season" checked>Season snapshot</label>
+            <label class="choice"><input type="radio" name="scope-mode" value="cumulative">Cumulative career</label>
+          </div>
+        </div>
+
+        <div class="control-block">
+          <label class="block-label">shot_made_flag</label>
+          <div class="choice-row">
+            <label class="choice"><input id="flag-made" type="checkbox" checked>1 = Made</label>
+            <label class="choice"><input id="flag-missed" type="checkbox" checked>0 = Missed</label>
+          </div>
+        </div>
+
+        <div class="control-block">
+          <label class="block-label">Sample scope</label>
+          <div class="choice-row">
+            <label class="choice"><input id="playoffs-only" type="checkbox">Playoffs only</label>
+          </div>
+        </div>
+
+        <div class="control-block">
+          <label class="block-label" for="zone-filter">Court zones</label>
+          <select id="zone-filter" multiple></select>
+        </div>
+      </div>
+
+      <div class="note" id="summary-note">Loading note...</div>
+      <div class="status" id="status-box"></div>
+    </section>
+
+    <section class="metrics">
+      <article class="metric-card">
+        <p class="metric-title">Shots in current view</p>
+        <h2 id="metric-visible-shots">-</h2>
+        <p id="metric-visible-detail">-</p>
+      </article>
+      <article class="metric-card">
+        <p class="metric-title">Made shots in scope</p>
+        <h2 id="metric-made-shots">-</h2>
+        <p id="metric-made-detail">-</p>
+      </article>
+      <article class="metric-card">
+        <p class="metric-title">FG% on known shots</p>
+        <h2 id="metric-fg-pct">-</h2>
+        <p id="metric-fg-detail">-</p>
+      </article>
+      <article class="metric-card">
+        <p class="metric-title">Three-point makes</p>
+        <h2 id="metric-three-makes">-</h2>
+        <p id="metric-three-detail">-</p>
+      </article>
+      <article class="metric-card">
+        <p class="metric-title">Favorite make zone</p>
+        <h2 id="metric-favorite-zone">-</h2>
+        <p id="metric-favorite-detail">-</p>
+      </article>
+    </section>
+
+    <section class="charts">
+      <article class="chart-panel">
+        <p class="chart-title">Kobe shot map</p>
+        <div class="chart-box" id="shot-chart"></div>
+      </article>
+      <article class="chart-panel">
+        <p class="chart-title">Court zones</p>
+        <div class="chart-box small" id="zone-chart"></div>
+      </article>
+    </section>
+
+    <section class="trend-panel">
+      <p class="chart-title">Career rhythm by season</p>
+      <div class="chart-box trend" id="trend-chart"></div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = "/api/reports/kobe-shot-poc";
+    const PLAY_INTERVAL_MS = 1400;
+    const SHOT_FLAG_ORDER = [1, 0];
+    const SHOT_FLAG_CONFIG = {
+      1: {
+        label: "Made (1)",
+        color: "#c6842f",
+        symbol: "circle",
+        size: 10,
+        opacity: 0.8,
+      },
+      0: {
+        label: "Missed (0)",
+        color: "#8b4c39",
+        symbol: "path://M -7,-4 L -4,-7 L 0,-3 L 4,-7 L 7,-4 L 3,0 L 7,4 L 4,7 L 0,3 L -4,7 L -7,4 L -3,0 Z",
+        size: 14,
+        opacity: 0.95,
+      },
+    };
+
+    const state = {
+      season: null,
+      seasons: [],
+      zones: [],
+      selectedZones: [],
+      shotMadeFlags: [1, 0],
+      cumulative: false,
+      playoffsOnly: false,
+      playing: false,
+      timerId: null,
+    };
+
+    const elements = {
+      backendPill: document.getElementById("backend-pill"),
+      seasonFocus: document.getElementById("season-focus"),
+      seasonSlider: document.getElementById("season-slider"),
+      seasonStart: document.getElementById("season-start"),
+      seasonCurrent: document.getElementById("season-current"),
+      seasonEnd: document.getElementById("season-end"),
+      playButton: document.getElementById("play-button"),
+      flagMade: document.getElementById("flag-made"),
+      flagMissed: document.getElementById("flag-missed"),
+      playoffsOnly: document.getElementById("playoffs-only"),
+      zoneFilter: document.getElementById("zone-filter"),
+      summaryNote: document.getElementById("summary-note"),
+      statusBox: document.getElementById("status-box"),
+      visibleShots: document.getElementById("metric-visible-shots"),
+      visibleDetail: document.getElementById("metric-visible-detail"),
+      madeShots: document.getElementById("metric-made-shots"),
+      madeDetail: document.getElementById("metric-made-detail"),
+      fgPct: document.getElementById("metric-fg-pct"),
+      fgDetail: document.getElementById("metric-fg-detail"),
+      threeMakes: document.getElementById("metric-three-makes"),
+      threeDetail: document.getElementById("metric-three-detail"),
+      favoriteZone: document.getElementById("metric-favorite-zone"),
+      favoriteDetail: document.getElementById("metric-favorite-detail"),
+    };
+
+    const shotChart = echarts.init(document.getElementById("shot-chart"));
+    const zoneChart = echarts.init(document.getElementById("zone-chart"));
+    const trendChart = echarts.init(document.getElementById("trend-chart"));
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("en-US").format(value || 0);
+    }
+
+    function selectedFlags() {
+      const flags = [];
+      if (elements.flagMade.checked) {
+        flags.push(1);
+      }
+      if (elements.flagMissed.checked) {
+        flags.push(0);
+      }
+      return SHOT_FLAG_ORDER.filter((flag) => flags.includes(flag));
+    }
+
+    function shotFlagLabel(flags) {
+      if (flags.length === 2) {
+        return "shot_made_flag 1 and 0";
+      }
+      if (flags[0] === 1) {
+        return "shot_made_flag 1";
+      }
+      if (flags[0] === 0) {
+        return "shot_made_flag 0";
+      }
+      return "no shot_made_flag selected";
+    }
+
+    function buildQueryString() {
+      const params = new URLSearchParams();
+      if (state.season) {
+        params.set("season", state.season);
+      }
+      if (state.cumulative) {
+        params.set("cumulative", "true");
+      }
+      if (state.playoffsOnly) {
+        params.set("playoffs_only", "true");
+      }
+      state.shotMadeFlags.forEach((flag) => params.append("shot_made_flag", String(flag)));
+      state.selectedZones.forEach((zone) => params.append("zone", zone));
+      return params.toString();
+    }
+
+    function buildArc(centerX, centerY, radius, startDegrees, endDegrees, segments = 70) {
+      const points = [];
+      for (let index = 0; index <= segments; index += 1) {
+        const angle = (startDegrees + ((endDegrees - startDegrees) * index) / segments) * Math.PI / 180;
+        points.push([centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle)]);
+      }
+      return points;
+    }
+
+    function courtSeries() {
+      const color = "#9b6a3a";
+      const lineStyle = { color, width: 2, opacity: 0.85 };
+      const base = {
+        type: "line",
+        silent: true,
+        showSymbol: false,
+        animation: false,
+        tooltip: { show: false },
+        lineStyle,
+        z: 1,
+      };
+      return [
+        { ...base, data: buildArc(0, 0, 7.5, 0, 360) },
+        { ...base, data: [[-30, -7.5], [30, -7.5]] },
+        { ...base, data: [[-80, -47.5], [-80, 143], [80, 143], [80, -47.5], [-80, -47.5]] },
+        { ...base, data: [[-60, -47.5], [-60, 143], [60, 143], [60, -47.5], [-60, -47.5]] },
+        { ...base, data: buildArc(0, 143, 60, 0, 180) },
+        { ...base, data: buildArc(0, 0, 40, 0, 180) },
+        { ...base, data: [[-220, -47.5], [-220, 92.5]] },
+        { ...base, data: [[220, -47.5], [220, 92.5]] },
+        { ...base, data: buildArc(0, 0, 237.5, 22, 158) },
+      ];
+    }
+
+    function shotSeries(records) {
+      return SHOT_FLAG_ORDER.filter((flag) => state.shotMadeFlags.includes(flag)).map((flag) => {
+        const config = SHOT_FLAG_CONFIG[flag];
+        const data = records
+          .filter((record) => record.shot_made_flag === flag)
+          .map((record) => ({
+            value: [record.loc_x, record.loc_y],
+            meta: record,
+          }));
+
+        return {
+          name: config.label,
+          type: "scatter",
+          data,
+          symbol: config.symbol,
+          symbolSize: config.size,
+          itemStyle: {
+            color: config.color,
+            opacity: config.opacity,
+            borderColor: "#fff8eb",
+            borderWidth: 1,
+          },
+          emphasis: {
+            scale: 1.15,
+          },
+          z: 4,
+          tooltip: {
+            formatter(params) {
+              const meta = params.data.meta;
+              return [
+                `<strong>${config.label}</strong>`,
+                `Date: ${meta.game_date_label || "n/a"}`,
+                `Matchup: ${meta.matchup || "n/a"}`,
+                `Opponent: ${meta.opponent || "n/a"}`,
+                `Shot: ${meta.shot_type || "n/a"}`,
+                `Zone: ${meta.shot_zone_basic || "n/a"}`,
+                `Distance: ${meta.shot_distance ?? "n/a"} ft`,
+                `shot_made_flag: ${meta.shot_made_flag}`,
+              ].join("<br>");
+            },
+          },
+        };
+      });
+    }
+
+    function updateControls(payload) {
+      if (!state.seasons.length) {
+        state.seasons = payload.available_seasons || [];
+      }
+      if (!state.zones.length) {
+        state.zones = payload.available_zones || [];
+      }
+      if (!state.season) {
+        state.season = payload.season;
+      }
+
+      const seasonIndex = Math.max(0, state.seasons.indexOf(state.season));
+      elements.seasonSlider.max = String(Math.max(0, state.seasons.length - 1));
+      elements.seasonSlider.value = String(seasonIndex);
+      elements.seasonStart.textContent = state.seasons[0] || "-";
+      elements.seasonCurrent.textContent = state.season || "-";
+      elements.seasonEnd.textContent = state.seasons[state.seasons.length - 1] || "-";
+
+      if (!elements.zoneFilter.options.length) {
+        state.zones.forEach((zone) => {
+          const option = document.createElement("option");
+          option.value = zone;
+          option.textContent = zone;
+          elements.zoneFilter.appendChild(option);
+        });
+      }
+      Array.from(elements.zoneFilter.options).forEach((option) => {
+        option.selected = state.selectedZones.includes(option.value);
+      });
+      elements.flagMade.checked = state.shotMadeFlags.includes(1);
+      elements.flagMissed.checked = state.shotMadeFlags.includes(0);
+      elements.playoffsOnly.checked = state.playoffsOnly;
+      document.querySelectorAll('input[name="scope-mode"]').forEach((input) => {
+        input.checked = input.value === (state.cumulative ? "cumulative" : "season");
+      });
+    }
+
+    function updateMetrics(payload) {
+      const scopeSummary = payload.scope_summary || {};
+      const viewSummary = payload.view_summary || {};
+      const visibleShots = viewSummary.visible_shots || 0;
+      const visibleMakes = viewSummary.visible_makes || 0;
+      const visibleMisses = viewSummary.visible_misses || 0;
+      const madeShots = scopeSummary.made_shots || 0;
+      const playoffMakes = scopeSummary.playoff_makes || 0;
+      const knownAttempts = scopeSummary.known_attempts || 0;
+      const fgPct = scopeSummary.fg_pct;
+      const threePointMakes = scopeSummary.three_point_makes || 0;
+      const favoriteZone = scopeSummary.favorite_zone || "n/a";
+      const favoriteZoneMakes = scopeSummary.favorite_zone_makes || 0;
+      const unknownCount = (scopeSummary.attempts || 0) - knownAttempts;
+
+      elements.visibleShots.textContent = formatNumber(visibleShots);
+      elements.visibleDetail.textContent = `${formatNumber(visibleMakes)} made (1), ${formatNumber(visibleMisses)} missed (0)`;
+      elements.madeShots.textContent = formatNumber(madeShots);
+      elements.madeDetail.textContent = `${formatNumber(playoffMakes)} came in playoffs`;
+      elements.fgPct.textContent = typeof fgPct === "number" ? `${fgPct.toFixed(1)}%` : "n/a";
+      elements.fgDetail.textContent = `Across ${formatNumber(knownAttempts)} known attempts in scope`;
+      elements.threeMakes.textContent = formatNumber(threePointMakes);
+      elements.threeDetail.textContent = "Long-range makes inside the selected scope";
+      elements.favoriteZone.textContent = favoriteZone;
+      elements.favoriteDetail.textContent = `${formatNumber(favoriteZoneMakes)} makes came from this zone`;
+
+      elements.seasonFocus.textContent = state.cumulative ? `Career through ${payload.season}` : `Season focus: ${payload.season}`;
+      elements.summaryNote.textContent = `Scope includes ${formatNumber(scopeSummary.attempts || 0)} shots and ${formatNumber(knownAttempts)} known outcomes; ${formatNumber(unknownCount)} rows still have withheld results in the sample. Visible symbols follow ${shotFlagLabel(state.shotMadeFlags)}.`;
+      elements.backendPill.textContent = `Backend: ${payload.backend_source}`;
+    }
+
+    function renderShotChart(payload) {
+      const zoneCount = (payload.zone_summary || []).length;
+      const option = {
+        animationDuration: 420,
+        backgroundColor: "transparent",
+        grid: { left: 16, right: 16, top: 44, bottom: 12, containLabel: false },
+        title: {
+          left: "center",
+          top: 4,
+          text: `${state.cumulative ? "Career through" : "Season"} ${payload.season} (${shotFlagLabel(state.shotMadeFlags)})`,
+          textStyle: { color: "#2a211c", fontSize: 15, fontWeight: 700, fontFamily: '"Avenir Next", "Trebuchet MS", Verdana, sans-serif' },
+          subtext: `${formatNumber(payload.records.length)} shots in view across ${zoneCount} court zones`,
+          subtextStyle: { color: "#6d5d4b", fontSize: 12 },
+        },
+        tooltip: { trigger: "item", appendToBody: true, backgroundColor: "rgba(36, 28, 22, 0.92)", borderWidth: 0, textStyle: { color: "#fff7eb" } },
+        legend: {
+          top: 48,
+          left: 8,
+          textStyle: { color: "#5f5041" },
+        },
+        xAxis: {
+          min: -260,
+          max: 260,
+          show: false,
+          scale: true,
+        },
+        yAxis: {
+          min: -60,
+          max: 430,
+          show: false,
+          scale: true,
+        },
+        series: [...courtSeries(), ...shotSeries(payload.records || [])],
+      };
+      shotChart.setOption(option, true);
+    }
+
+    function renderZoneChart(payload) {
+      const zoneSummary = payload.zone_summary || [];
+      const color = state.shotMadeFlags.length === 1 && state.shotMadeFlags[0] === 0 ? "#8b4c39" : "#b66e28";
+      zoneChart.setOption({
+        animationDuration: 360,
+        backgroundColor: "transparent",
+        grid: { left: 92, right: 22, top: 34, bottom: 16 },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+          backgroundColor: "rgba(36, 28, 22, 0.92)",
+          borderWidth: 0,
+          textStyle: { color: "#fff7eb" },
+          formatter(params) {
+            if (!params.length) {
+              return "";
+            }
+            const row = zoneSummary[params[0].dataIndex];
+            return [
+              `<strong>${row.shot_zone_basic || "Unknown zone"}</strong>`,
+              `Shots in view: ${formatNumber(row.visible_shots)}`,
+              `Made shots: ${formatNumber(row.made_shots)}`,
+              `Known attempts: ${formatNumber(row.known_attempts)}`,
+              `FG%: ${row.fg_pct == null ? "n/a" : `${row.fg_pct.toFixed(1)}%`}`,
+            ].join("<br>");
+          },
+        },
+        xAxis: {
+          type: "value",
+          axisLabel: { color: "#6b5949" },
+          splitLine: { lineStyle: { color: "rgba(182, 145, 103, 0.28)" } },
+        },
+        yAxis: {
+          type: "category",
+          inverse: true,
+          axisLabel: { color: "#43352b", width: 96, overflow: "truncate" },
+          data: zoneSummary.map((row) => row.shot_zone_basic || "Unknown"),
+        },
+        series: [
+          {
+            type: "bar",
+            data: zoneSummary.map((row) => row.visible_shots),
+            itemStyle: { color, borderRadius: [0, 8, 8, 0] },
+            label: { show: true, position: "right", color: "#4d3c31" },
+          },
+        ],
+      }, true);
+    }
+
+    function renderTrendChart(payload) {
+      const seasonSummary = payload.season_summary || [];
+      trendChart.setOption({
+        animationDuration: 360,
+        backgroundColor: "transparent",
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: "rgba(36, 28, 22, 0.92)",
+          borderWidth: 0,
+          textStyle: { color: "#fff7eb" },
+        },
+        legend: {
+          top: 0,
+          left: 8,
+          textStyle: { color: "#5f5041" },
+        },
+        grid: { left: 48, right: 48, top: 42, bottom: 44 },
+        xAxis: {
+          type: "category",
+          data: seasonSummary.map((row) => row.season),
+          axisLabel: { color: "#6b5949", rotate: 35 },
+          axisLine: { lineStyle: { color: "rgba(120, 93, 72, 0.34)" } },
+        },
+        yAxis: [
+          {
+            type: "value",
+            name: "Made shots",
+            axisLabel: { color: "#6b5949" },
+            splitLine: { lineStyle: { color: "rgba(182, 145, 103, 0.28)" } },
+          },
+          {
+            type: "value",
+            name: "FG%",
+            axisLabel: { color: "#6b5949" },
+            splitLine: { show: false },
+          },
+        ],
+        series: [
+          {
+            name: "Made shots",
+            type: "bar",
+            yAxisIndex: 0,
+            data: seasonSummary.map((row) => ({
+              value: row.made_shots,
+              itemStyle: { color: row.season === payload.season ? "#b66e28" : "#e2c18e" },
+            })),
+            barMaxWidth: 26,
+          },
+          {
+            name: "FG% on known shots",
+            type: "line",
+            yAxisIndex: 1,
+            data: seasonSummary.map((row) => row.fg_pct),
+            smooth: true,
+            symbol: "circle",
+            symbolSize: 9,
+            lineStyle: { width: 3, color: "#4d3c31" },
+            itemStyle: { color: "#4d3c31" },
+          },
+        ],
+      }, true);
+    }
+
+    function setStatus(message, isError = false) {
+      elements.statusBox.textContent = message;
+      elements.statusBox.className = isError ? "status error" : "status";
+      if (!message) {
+        elements.statusBox.className = "status";
+      }
+    }
+
+    async function loadPayload() {
+      const queryString = buildQueryString();
+      const response = await fetch(queryString ? `${API_URL}?${queryString}` : API_URL, { headers: { Accept: "application/json" } });
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function refreshDashboard() {
+      try {
+        setStatus("");
+        const payload = await loadPayload();
+        if (!state.season) {
+          state.season = payload.season;
+        }
+        updateControls(payload);
+        updateMetrics(payload);
+        renderShotChart(payload);
+        renderZoneChart(payload);
+        renderTrendChart(payload);
+      } catch (error) {
+        console.error(error);
+        setStatus(`Unable to load the ECharts POC. ${error.message}`, true);
+      }
+    }
+
+    function advanceSeason() {
+      if (!state.seasons.length) {
+        return;
+      }
+      const index = state.seasons.indexOf(state.season);
+      const nextIndex = index >= state.seasons.length - 1 ? 0 : index + 1;
+      state.season = state.seasons[nextIndex];
+      elements.seasonSlider.value = String(nextIndex);
+      refreshDashboard();
+    }
+
+    function togglePlayback() {
+      state.playing = !state.playing;
+      elements.playButton.textContent = state.playing ? "Pause" : "Play";
+      if (state.playing) {
+        state.timerId = window.setInterval(advanceSeason, PLAY_INTERVAL_MS);
+      } else if (state.timerId) {
+        window.clearInterval(state.timerId);
+        state.timerId = null;
+      }
+    }
+
+    function registerEvents() {
+      elements.playButton.addEventListener("click", togglePlayback);
+      elements.seasonSlider.addEventListener("input", (event) => {
+        const index = Number(event.target.value);
+        state.season = state.seasons[index] || state.season;
+        elements.seasonCurrent.textContent = state.season || "-";
+        refreshDashboard();
+      });
+      document.querySelectorAll('input[name="scope-mode"]').forEach((input) => {
+        input.addEventListener("change", (event) => {
+          state.cumulative = event.target.value === "cumulative";
+          refreshDashboard();
+        });
+      });
+      [elements.flagMade, elements.flagMissed].forEach((input) => {
+        input.addEventListener("change", () => {
+          const nextFlags = selectedFlags();
+          if (!nextFlags.length) {
+            input.checked = true;
+            return;
+          }
+          state.shotMadeFlags = nextFlags;
+          refreshDashboard();
+        });
+      });
+      elements.playoffsOnly.addEventListener("change", () => {
+        state.playoffsOnly = elements.playoffsOnly.checked;
+        refreshDashboard();
+      });
+      elements.zoneFilter.addEventListener("change", () => {
+        state.selectedZones = Array.from(elements.zoneFilter.selectedOptions).map((option) => option.value);
+        refreshDashboard();
+      });
+      window.addEventListener("resize", () => {
+        shotChart.resize();
+        zoneChart.resize();
+        trendChart.resize();
+      });
+    }
+
+    registerEvents();
+    refreshDashboard();
+  </script>
+</body>
+</html>

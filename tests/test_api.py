@@ -15,6 +15,13 @@ def test_health_endpoint() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_echarts_page_is_served() -> None:
+    response = client.get("/echarts/kobe-shot-poc")
+    assert response.status_code == 200
+    assert "Apache ECharts" in response.text
+    assert "Kobe shot archive POC on ECharts" in response.text
+
+
 def test_fg3m_report_endpoint_returns_filtered_data() -> None:
     response = client.get("/api/reports/fg3m", params={"player_id": 101, "upto_season": "2001-02"})
     assert response.status_code == 200
@@ -34,8 +41,10 @@ def test_kobe_shot_poc_endpoint_returns_scope_and_view_summaries() -> None:
 
     payload = response.json()
     assert payload["tool_option"] == "dash-plotly"
+    assert payload["supported_frontends"] == ["dash-plotly", "echarts"]
     assert payload["backend_source"] == "file"
     assert payload["season"] == "2000-01"
     assert payload["scope_summary"]["made_shots"] == 735
     assert payload["view_summary"]["visible_shots"] == 1575
     assert payload["records"][0]["shot_result"] in {"Made", "Missed"}
+    assert payload["records"][0]["shot_made_flag"] in {0, 1}
