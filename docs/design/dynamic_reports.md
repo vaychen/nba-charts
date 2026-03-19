@@ -2,6 +2,15 @@
 
 ## What kind of tool you need
 
+```mermaid
+flowchart TD
+    A[Need a dynamic NBA report] --> B{Primary goal}
+    B -->|Fast MVP in Python| C[Dash + Plotly]
+    B -->|Custom web interactions| D[ECharts]
+    B -->|Narrative visual storytelling| E[D3.js]
+    B -->|Distribution and governance| F[Power BI / Tableau]
+```
+
 Time-based reports usually need four things:
 
 - a timeline or season index
@@ -42,6 +51,7 @@ Time-based reports usually need four things:
 
 - FastAPI for reusable data endpoints
 - Dash for the local dynamic report demo
+- Dash + Plotly now also powers a Kobe shot-archive POC backed by `data/sample/kobe_career_shoot_made.csv`
 - precomputed datasets under `data/processed/` later, sample data for now
 
 ### Long term

@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "lotus-data-charts"
+name = "nba-charts"
 version = "0.2.0"
 description = "Cross-platform NBA analytics APIs, ETL jobs, and dynamic chart demos."
 readme = "README.md"
@@ -22,7 +22,9 @@ dependencies = [
 
 [project.scripts]
 nba-charts-api = "nba_charts.api.main:run"
+nba-charts-db = "nba_charts.etl.manage_postgres:main"
 nba-charts-dashboard = "nba_charts.ui.dash_app:run"
+nba-charts-kobe-shot-poc = "nba_charts.ui.kobe_shot_poc:run"
 nba-charts-sync = "nba_charts.etl.sync_reference:main"
 
 [tool.uv]

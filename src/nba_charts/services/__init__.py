@@ -1,1 +1,1 @@
-"""Service layer for Lotus Data Charts."""
+"""Service layer for NBA Charts."""

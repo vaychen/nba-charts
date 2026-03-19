@@ -85,9 +85,7 @@ def create_app() -> Dash:
         children=[
             html.Div(
                 [
-                    html.P(
-                        "Lotus Data Charts", style={"letterSpacing": "0.18em", "color": "#8A5A44"}
-                    ),
+                    html.P("NBA Charts", style={"letterSpacing": "0.18em", "color": "#8A5A44"}),
                     html.H1("Dynamic 3PT report", style={"marginTop": "0", "color": "#2F3E46"}),
                     html.P(
                         (
@@ -244,7 +242,7 @@ def create_app() -> Dash:
 
 def run() -> None:
     app = create_app()
-    app.run(host=SETTINGS.dashboard_host, port=SETTINGS.dashboard_port, debug=True)
+    app.run(host=SETTINGS.dashboard_host, port=str(SETTINGS.dashboard_port), debug=True)
 
 
 if __name__ == "__main__":

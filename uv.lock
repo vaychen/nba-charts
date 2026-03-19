@@ -529,59 +529,6 @@ wheels = [
 ]
 
 [[package]]
-name = "lotus-data-charts"
-version = "0.2.0"
-source = { editable = "." }
-dependencies = [
-    { name = "dash" },
-    { name = "fastapi" },
-    { name = "matplotlib" },
-    { name = "nba-api" },
-    { name = "pandas" },
-    { name = "plotly" },
-    { name = "psycopg", extra = ["binary"] },
-    { name = "python-dotenv" },
-    { name = "uvicorn" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "ipykernel" },
-]
-lint = [
-    { name = "mypy" },
-    { name = "ruff" },
-]
-test = [
-    { name = "httpx" },
-    { name = "pytest" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "dash", specifier = "~=2.18.2" },
-    { name = "fastapi", specifier = "~=0.115.12" },
-    { name = "matplotlib", specifier = "~=3.10.1" },
-    { name = "nba-api", specifier = "~=1.10.1" },
-    { name = "pandas", specifier = "~=2.2.3" },
-    { name = "plotly", specifier = "~=6.0.1" },
-    { name = "psycopg", extras = ["binary"], specifier = "~=3.2.6" },
-    { name = "python-dotenv", specifier = "~=1.0.1" },
-    { name = "uvicorn", specifier = "~=0.34.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "ipykernel", specifier = "~=6.29.5" }]
-lint = [
-    { name = "mypy", specifier = "~=1.15.0" },
-    { name = "ruff", specifier = "~=0.11.0" },
-]
-test = [
-    { name = "httpx", specifier = "~=0.28.1" },
-    { name = "pytest", specifier = "~=8.3.5" },
-]
-
-[[package]]
 name = "markupsafe"
 version = "3.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -703,6 +650,59 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/4a/bb/b3e75001debab67c9d0944e885b19d749902800fa030071b3b992fb244c8/nba_api-1.10.2.tar.gz", hash = "sha256:68ca205459e0e09ad633ef15c9417c14049d8ca196097a716317d82f71eb3815", size = 156148, upload-time = "2025-09-30T20:51:05.181Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/18/b6/32f9837c63e18ba20ebc51a4e3970797e04d701fc02c73c64a7298c10143/nba_api-1.10.2-py3-none-any.whl", hash = "sha256:9aecc454aa54e273ce28f861b3f3d81ee557b3967adf4d97894dc49dbbe331b8", size = 286996, upload-time = "2025-09-30T20:51:04.092Z" },
+]
+
+[[package]]
+name = "nba-charts"
+version = "0.2.0"
+source = { editable = "." }
+dependencies = [
+    { name = "dash" },
+    { name = "fastapi" },
+    { name = "matplotlib" },
+    { name = "nba-api" },
+    { name = "pandas" },
+    { name = "plotly" },
+    { name = "psycopg", extra = ["binary"] },
+    { name = "python-dotenv" },
+    { name = "uvicorn" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "ipykernel" },
+]
+lint = [
+    { name = "mypy" },
+    { name = "ruff" },
+]
+test = [
+    { name = "httpx" },
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "dash", specifier = "~=2.18.2" },
+    { name = "fastapi", specifier = "~=0.115.12" },
+    { name = "matplotlib", specifier = "~=3.10.1" },
+    { name = "nba-api", specifier = "~=1.10.1" },
+    { name = "pandas", specifier = "~=2.2.3" },
+    { name = "plotly", specifier = "~=6.0.1" },
+    { name = "psycopg", extras = ["binary"], specifier = "~=3.2.6" },
+    { name = "python-dotenv", specifier = "~=1.0.1" },
+    { name = "uvicorn", specifier = "~=0.34.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ipykernel", specifier = "~=6.29.5" }]
+lint = [
+    { name = "mypy", specifier = "~=1.15.0" },
+    { name = "ruff", specifier = "~=0.11.0" },
+]
+test = [
+    { name = "httpx", specifier = "~=0.28.1" },
+    { name = "pytest", specifier = "~=8.3.5" },
 ]
 
 [[package]]
