@@ -71,4 +71,4 @@ tests/
 ### Phase 3
 
 - split UI from API if a custom frontend is needed later
-- add CI that runs `make check` on both macOS and Windows runners
+- add CI that runs lint, type checks, and tests on both macOS and Windows runners

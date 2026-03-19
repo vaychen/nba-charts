@@ -8,6 +8,14 @@ Use this runbook when you want to run the repo against a local Postgres instance
 
 Copy `.env.example` to `.env` in the repo root and keep it untracked.
 
+```bash
+cp .env.example .env
+```
+
+```powershell
+Copy-Item .env.example .env
+```
+
 ```dotenv
 NBA_CHARTS_DB_HOST=127.0.0.1
 NBA_CHARTS_DB_PORT=5432
@@ -94,6 +102,24 @@ make sync-all
 psql -h 127.0.0.1 -p 5432 -U postgres -d nba_charts -c "SELECT COUNT(*) FROM stats.players;"
 psql -h 127.0.0.1 -p 5432 -U postgres -d nba_charts -c "SELECT COUNT(*) FROM stats.teams;"
 psql -h 127.0.0.1 -p 5432 -U postgres -d nba_charts -c "SELECT COUNT(*) FROM analytics.kobe_shots;"
+```
+
+Cross-platform Python verification:
+
+```python
+from psycopg import connect
+
+dsn = "dbname=nba_charts user=postgres password=123456789 host=127.0.0.1 port=5432"
+
+with connect(dsn, connect_timeout=10) as conn:
+    with conn.cursor() as cur:
+        for sql in [
+            "select count(*) from stats.players",
+            "select count(*) from stats.teams",
+            "select count(*) from analytics.kobe_shots",
+        ]:
+            cur.execute(sql)
+            print(sql, cur.fetchone()[0])
 ```
 
 ## Notes

@@ -18,7 +18,10 @@ Requirements:
 
 - Python version pinned in `.python-version` (`3.13`)
 - `uv` - install guide: https://docs.astral.sh/uv/
+- PostgreSQL locally - recommended: `Postgres.app` on macOS, installed PostgreSQL with `psql` on Windows
 - `make` if you want the shared Makefile workflow on both devices
+
+For local database work, `psql` is the recommended shared inspection tool across both platforms.
 
 Bootstrap the project:
 
@@ -27,7 +30,14 @@ uv python install 3.13
 make setup
 ```
 
+For the local env file:
+
+- macOS or Linux: `cp .env.example .env`
+- PowerShell: `Copy-Item .env.example .env`
+
 The repo tracks the target interpreter in `.python-version`, and the Makefile stays thin by letting `uv` use that project setting. If `make` is not available yet on Windows, use the direct `uv` commands in `docs/records/runbooks/cross_platform_workflow.md`.
+
+For the Windows PostgreSQL + PowerShell workflow, use `docs/records/runbooks/windows_postgres_psql.md`.
 
 ## Common commands
 
@@ -42,6 +52,8 @@ make sync-all
 ```
 
 The Kobe POC runs on `http://127.0.0.1:8051` by default. With `NBA_CHARTS_KOBE_DATA_SOURCE=auto` or `postgres`, it can read from the local Postgres backend after `make prepare-kobe-backend`, which now also fills `stats.players` and `stats.teams` from `nba_api`.
+
+GitHub Actions now runs lint, type checks, and tests on both macOS and Windows in `.github/workflows/ci.yml`.
 
 ## Environment configuration
 
@@ -73,4 +85,5 @@ Important variables:
 - `docs/design/kobe_shot_poc.md`
 - `docs/records/runbooks/cross_platform_workflow.md`
 - `docs/records/runbooks/local_postgres.md`
+- `docs/records/runbooks/windows_postgres_psql.md`
 - `docs/records/changes/repo_refactor.md`

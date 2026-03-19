@@ -5,6 +5,8 @@
 - macOS with Homebrew or direct Python installation
 - Windows with PowerShell, Command Prompt, or Git Bash
 
+For the dedicated Windows PostgreSQL + PowerShell setup, see `docs/records/runbooks/windows_postgres_psql.md`.
+
 The recommended workflow uses `uv` on both devices and optionally uses GNU Make as a shared command layer.
 
 The repo pins Python in `.python-version`, so local `uv sync` and `uv run` commands resolve against the project target version after it is installed.
@@ -14,6 +16,16 @@ The repo pins Python in `.python-version`, so local `uv sync` and `uv run` comma
 ```bash
 uv python install 3.13
 make setup
+```
+
+Copy the local env file with the command that matches your shell:
+
+```bash
+cp .env.example .env
+```
+
+```powershell
+Copy-Item .env.example .env
 ```
 
 If `make` is not available yet, use the direct command:
@@ -56,3 +68,4 @@ uv sync --all-groups
 - commit `pyproject.toml` and `uv.lock` together after dependency changes
 - use Python `3.13` on both machines to reduce lockfile churn
 - prefer sample or precomputed datasets in git instead of machine-local raw extracts
+- rely on `.github/workflows/ci.yml` to catch macOS and Windows regressions before they spread
