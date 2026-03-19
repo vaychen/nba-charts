@@ -85,9 +85,7 @@ def create_app() -> Dash:
         children=[
             html.Div(
                 [
-                    html.P(
-                        "Lotus Data Charts", style={"letterSpacing": "0.18em", "color": "#8A5A44"}
-                    ),
+                    html.P("NBA Charts", style={"letterSpacing": "0.18em", "color": "#8A5A44"}),
                     html.H1("Dynamic 3PT report", style={"marginTop": "0", "color": "#2F3E46"}),
                     html.P(
                         (

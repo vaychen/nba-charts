@@ -23,7 +23,7 @@ def _serialize_report_frame(records: list[dict[str, object]]) -> list[dict[str, 
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Lotus Data Charts API", version="0.2.0")
+    app = FastAPI(title="NBA Charts API", version="0.2.0")
 
     app.add_middleware(
         CORSMiddleware,
@@ -35,7 +35,7 @@ def create_app() -> FastAPI:
 
     @app.get("/")
     def root() -> dict[str, str]:
-        return {"message": "Lotus Data Charts API"}
+        return {"message": "NBA Charts API"}
 
     @app.get("/health")
     def health() -> dict[str, str]:

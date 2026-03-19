@@ -1,1 +1,1 @@
-"""Lotus Data Charts package."""
+"""NBA Charts package."""

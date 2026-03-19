@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "lotus-data-charts"
+name = "nba-charts"
 version = "0.2.0"
 description = "Cross-platform NBA analytics APIs, ETL jobs, and dynamic chart demos."
 readme = "README.md"

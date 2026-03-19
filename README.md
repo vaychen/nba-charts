@@ -1,4 +1,4 @@
-# lotus-data-charts
+# nba-charts
 
 Cross-platform NBA analytics tooling for APIs, ETL jobs, and dynamic chart demos.
 
