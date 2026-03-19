@@ -9,7 +9,7 @@ Cross-platform NBA analytics tooling for APIs, ETL jobs, and dynamic chart demos
 - `src/nba_charts/etl` - reference-data sync scripts for players and teams.
 - `data/sample` - sample data used for local development and tests.
 - `data/sample/kobe_career_shoot_made.csv` - Kobe career shot sample used by the first tool-option POC.
-- `docs` - refactor plan, dynamic report architecture, and device workflow notes.
+- `docs` - architecture notes, runbooks, and change records.
 
 
 ## Local setup
@@ -27,7 +27,7 @@ uv python install 3.13
 make setup
 ```
 
-The repo tracks the target interpreter in `.python-version`, and the Makefile stays thin by letting `uv` use that project setting. If `make` is not available yet on Windows, use the direct `uv` commands in `docs/cross_platform_workflow.md`.
+The repo tracks the target interpreter in `.python-version`, and the Makefile stays thin by letting `uv` use that project setting. If `make` is not available yet on Windows, use the direct `uv` commands in `docs/records/runbooks/cross_platform_workflow.md`.
 
 ## Common commands
 
@@ -44,7 +44,7 @@ The Kobe POC runs on `http://127.0.0.1:8051` by default and focuses on the sampl
 
 ## Environment configuration
 
-Copy `.env.example` to `.env` and adjust values when you need database-backed ETL runs.
+Create a local `.env` and adjust values when you need database-backed ETL runs.
 
 Important variables:
 
@@ -52,11 +52,21 @@ Important variables:
 - `NBA_CHARTS_API_PORT`
 - `NBA_CHARTS_DASH_HOST`
 - `NBA_CHARTS_DASH_PORT`
+- `NBA_CHARTS_DASH_INTERVAL_MS`
 - `NBA_CHARTS_DB_DSN`
+- `NBA_CHARTS_DB_HOST`
+- `NBA_CHARTS_DB_PORT`
+- `NBA_CHARTS_DB_NAME`
+- `NBA_CHARTS_DB_USER`
+- `NBA_CHARTS_DB_PASSWORD`
 
 ## Docs
 
-- `docs/refactor_plan.md`
-- `docs/dynamic_reports.md`
-- `docs/cross_platform_workflow.md`
-- `docs/kobe_shot_poc.md`
+- `docs/README.md`
+- `docs/design/system_architecture.md`
+- `docs/design/backend_data_architecture.md`
+- `docs/design/dynamic_reports.md`
+- `docs/design/kobe_shot_poc.md`
+- `docs/records/runbooks/cross_platform_workflow.md`
+- `docs/records/runbooks/local_postgres.md`
+- `docs/records/changes/repo_refactor.md`

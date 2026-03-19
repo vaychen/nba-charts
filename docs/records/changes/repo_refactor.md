@@ -1,4 +1,4 @@
-# Refactor plan
+# Repository refactor record
 
 ## Goals
 
@@ -44,7 +44,7 @@ tests/
 - delete old generated files: `.DS_Store`, `__pycache__`, `*.pyc`
 - delete duplicate UI paths that were not part of the chosen runtime architecture
 - remove `work_dir/` as a catch-all scratch space and replace it with named package modules
-- keep `doc/design_overview.png` until the image assets are reorganized separately
+- keep design assets organized separately from runtime code and data
 
 ## Cross-platform decisions
 

@@ -1,5 +1,13 @@
 # Kobe shot POC
 
+```mermaid
+flowchart LR
+    sample[data/sample/kobe_career_shoot_made.csv] --> service[nba_charts.services.kobe_shots]
+    service --> api[/api/reports/kobe-shot-poc/]
+    service --> dash[Dash + Plotly POC]
+    api --> future[Future ECharts / D3 / BI clients]
+```
+
 ## Current status
 
 - implemented first tool option: Dash + Plotly

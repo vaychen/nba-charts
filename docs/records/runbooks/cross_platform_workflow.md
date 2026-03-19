@@ -5,7 +5,7 @@
 - macOS with Homebrew or direct Python installation
 - Windows with PowerShell, Command Prompt, or Git Bash
 
-The shared assumption is that both devices use `uv` and a GNU Make implementation.
+The recommended workflow uses `uv` on both devices and optionally uses GNU Make as a shared command layer.
 
 The repo pins Python in `.python-version`, so local `uv sync` and `uv run` commands resolve against the project target version after it is installed.
 
@@ -31,10 +31,12 @@ uv sync --all-groups
 | Run API | `make run-api` | `uv run nba-charts-api` |
 | Run dashboard | `make run-dashboard` | `uv run nba-charts-dashboard` |
 | Run Kobe shot POC | `make run-kobe-shot-poc` | `uv run nba-charts-kobe-shot-poc` |
+| Check | `make check` | `uv run ruff check src tests scripts` then `uv run pytest` |
 | Lint | `make lint` | `uv run ruff check src tests scripts` then `uv run mypy src` |
 | Test | `make test` | `uv run pytest` |
 | Sync players | `make sync-players` | `uv run nba-charts-sync players` |
 | Sync teams | `make sync-teams` | `uv run nba-charts-sync teams` |
+| Sync all | `make sync-all` | `uv run nba-charts-sync all` |
 | Clean artifacts | `make clean` | `uv run python scripts/clean.py` |
 
 ## Why the Makefile stays simple
