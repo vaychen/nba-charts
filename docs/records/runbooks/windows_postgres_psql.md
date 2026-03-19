@@ -16,6 +16,48 @@ Suggested installer choices:
 - username: `postgres`
 - password: your local password
 
+## Launch PostgreSQL on Windows
+
+PostgreSQL on Windows usually runs as a Windows service after installation.
+
+Check the installed PostgreSQL service:
+
+```powershell
+Get-Service | Where-Object {$_.Name -like "postgresql*"}
+```
+
+If you want to search by display name instead:
+
+```powershell
+Get-Service | Where-Object {$_.DisplayName -like "*PostgreSQL*"}
+```
+
+Start the service with the exact service name returned above. A common example is:
+
+```powershell
+Start-Service postgresql-x64-18
+```
+
+Check the service status:
+
+```powershell
+Get-Service postgresql-x64-18
+```
+
+Useful service commands:
+
+```powershell
+Start-Service postgresql-x64-18
+Stop-Service postgresql-x64-18
+Restart-Service postgresql-x64-18
+```
+
+Once the service is running, verify the server connection with `psql`:
+
+```powershell
+psql -h 127.0.0.1 -p 5432 -U postgres -d postgres
+```
+
 ## Verify psql in PowerShell
 
 Open a new PowerShell window and run:
@@ -30,6 +72,12 @@ If `psql` is not on `PATH`, run it directly:
 & "C:\Program Files\PostgreSQL\18\bin\psql.exe" --version
 ```
 
+If `psql` is not on `PATH`, you can also use the full executable path for connections:
+
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h 127.0.0.1 -p 5432 -U postgres -d postgres
+```
+
 ## Repo setup
 
 ```powershell
@@ -38,6 +86,12 @@ uv python install 3.13
 uv sync --all-groups
 uv run nba-charts-db prepare-kobe-backend
 uv run nba-charts-kobe-shot-poc
+```
+
+After PostgreSQL is running, you can prepare the repo database at any time with:
+
+```powershell
+uv run nba-charts-db prepare-kobe-backend
 ```
 
 ## Verification
