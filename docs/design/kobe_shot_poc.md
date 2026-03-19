@@ -16,6 +16,7 @@ flowchart LR
 - direct command: `uv run nba-charts-kobe-shot-poc`
 - local API data endpoint for future tool options: `/api/reports/kobe-shot-poc`
 - backend mode: file, postgres, or auto via `NBA_CHARTS_KOBE_DATA_SOURCE`
+- browser ECharts route: `/echarts/kobe-shot-poc` from the FastAPI server
 
 ## What the first POC does
 
@@ -40,9 +41,9 @@ flowchart LR
 
 ### ECharts
 
-- next candidate for a polished browser-first shot map
-- would reuse `/api/reports/kobe-shot-poc` and move rendering into a custom frontend
-- strongest fit if the team wants richer transitions and denser point rendering
+- now implemented as a browser-first shot map served by FastAPI
+- reuses `/api/reports/kobe-shot-poc` and renders the view in a custom HTML + JavaScript frontend
+- strongest fit if the team wants richer transitions, denser point rendering, and easier future UI customization
 
 ### D3.js
 

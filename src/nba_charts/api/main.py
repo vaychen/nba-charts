@@ -1,9 +1,10 @@
+from pathlib import Path
 from typing import Annotated, Literal
 
 import uvicorn
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 
 from nba_charts.services.datasets import (
     filter_fg3m_dataset,
@@ -24,6 +25,8 @@ from nba_charts.services.kobe_shots import (
 )
 from nba_charts.services.nba import get_shot_chart_records, render_shot_chart_image
 from nba_charts.settings import SETTINGS
+
+STATIC_ROOT = Path(__file__).resolve().parent / "static"
 
 
 def _serialize_report_frame(records: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -59,6 +62,10 @@ def create_app() -> FastAPI:
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/echarts/kobe-shot-poc")
+    def kobe_shot_poc_echarts() -> FileResponse:
+        return FileResponse(STATIC_ROOT / "kobe_shot_poc_echarts.html", media_type="text/html")
 
     @app.get("/api/reports/fg3m")
     def fg3m_report(
@@ -132,6 +139,7 @@ def create_app() -> FastAPI:
             "shot_made_flags": shot_made_flag or [],
             "playoffs_only": playoffs_only,
             "tool_option": "dash-plotly",
+            "supported_frontends": ["dash-plotly", "echarts"],
             "backend_source": snapshot.backend,
             "available_seasons": seasons,
             "available_zones": kobe_shot_zone_options(dataframe),
@@ -161,6 +169,7 @@ def create_app() -> FastAPI:
                     "playoffs",
                     "loc_x",
                     "loc_y",
+                    "shot_made_flag",
                     "shot_result",
                     "points_value",
                 ],
