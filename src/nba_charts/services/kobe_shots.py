@@ -1,39 +1,76 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 import pandas as pd
 
 from nba_charts.services.datasets import season_sort_key
 from nba_charts.settings import SETTINGS
 
+KOBE_SHOT_BASE_COLUMNS = [
+    "action_type",
+    "combined_shot_type",
+    "game_event_id",
+    "game_id",
+    "lat",
+    "loc_x",
+    "loc_y",
+    "lon",
+    "minutes_remaining",
+    "period",
+    "playoffs",
+    "season",
+    "seconds_remaining",
+    "shot_distance",
+    "shot_made_flag",
+    "shot_type",
+    "shot_zone_area",
+    "shot_zone_basic",
+    "shot_zone_range",
+    "team_id",
+    "team_name",
+    "game_date",
+    "matchup",
+    "opponent",
+    "shot_id",
+]
 
-def load_kobe_shot_dataset(path: Path | None = None) -> pd.DataFrame:
-    dataset_path = path or SETTINGS.sample_kobe_shot_path
-    dataframe = pd.read_csv(dataset_path)
+
+def normalize_kobe_shot_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     if dataframe.empty:
-        return dataframe
+        return dataframe.copy()
 
     normalized = dataframe.copy()
+    playoffs = cast(Any, normalized["playoffs"])
+    shot_distance = cast(Any, pd.to_numeric(normalized["shot_distance"], errors="coerce"))
+    loc_x = cast(Any, pd.to_numeric(normalized["loc_x"], errors="coerce"))
+    loc_y = cast(Any, pd.to_numeric(normalized["loc_y"], errors="coerce"))
     normalized["season"] = normalized["season"].astype(str)
     normalized["season_order"] = normalized["season"].map(season_sort_key)
     normalized["game_date"] = pd.to_datetime(normalized["game_date"], errors="coerce")
-    normalized["playoffs"] = normalized["playoffs"].fillna(0).astype(int)
-    normalized["shot_distance"] = pd.to_numeric(
-        normalized["shot_distance"], errors="coerce"
-    ).fillna(0)
-    normalized["loc_x"] = pd.to_numeric(normalized["loc_x"], errors="coerce").fillna(0)
-    normalized["loc_y"] = pd.to_numeric(normalized["loc_y"], errors="coerce").fillna(0)
+    normalized["playoffs"] = playoffs.fillna(0).astype(int)
+    normalized["shot_distance"] = shot_distance.fillna(0)
+    normalized["loc_x"] = loc_x.fillna(0)
+    normalized["loc_y"] = loc_y.fillna(0)
     normalized["shot_made_flag"] = pd.to_numeric(
         normalized["shot_made_flag"], errors="coerce"
     ).astype("Int64")
-    normalized["shot_result"] = normalized["shot_made_flag"].map({1: "Made", 0: "Missed"})
-    normalized["shot_result"] = normalized["shot_result"].fillna("Unknown")
+    normalized["shot_result"] = cast(Any, normalized["shot_made_flag"]).map(
+        {1: "Made", 0: "Missed"}
+    )
+    normalized["shot_result"] = cast(Any, normalized["shot_result"]).fillna("Unknown")
     normalized["points_value"] = (
         normalized["shot_type"].eq("3PT Field Goal").map({True: 3, False: 2})
     )
     normalized["game_date_label"] = normalized["game_date"].dt.strftime("%Y-%m-%d")
     return normalized.sort_values(["season_order", "game_date", "shot_id"]).reset_index(drop=True)
+
+
+def load_kobe_shot_dataset(path: Path | None = None) -> pd.DataFrame:
+    dataset_path = path or SETTINGS.sample_kobe_shot_path
+    dataframe = pd.read_csv(dataset_path)
+    return normalize_kobe_shot_dataframe(dataframe)
 
 
 def kobe_season_list(dataframe: pd.DataFrame) -> list[str]:

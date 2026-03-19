@@ -31,6 +31,9 @@ uv sync --all-groups
 | Run API | `make run-api` | `uv run nba-charts-api` |
 | Run dashboard | `make run-dashboard` | `uv run nba-charts-dashboard` |
 | Run Kobe shot POC | `make run-kobe-shot-poc` | `uv run nba-charts-kobe-shot-poc` |
+| Bootstrap local DB | `make db-bootstrap` | `uv run nba-charts-db bootstrap` |
+| Load Kobe sample into DB | `make load-kobe-shots` | `uv run nba-charts-db load-kobe-shots` |
+| Prepare Kobe Postgres backend | `make prepare-kobe-backend` | `uv run nba-charts-db prepare-kobe-backend` |
 | Check | `make check` | `uv run ruff check src tests scripts` then `uv run pytest` |
 | Lint | `make lint` | `uv run ruff check src tests scripts` then `uv run mypy src` |
 | Test | `make test` | `uv run pytest` |
@@ -40,6 +43,8 @@ uv sync --all-groups
 | Clean artifacts | `make clean` | `uv run python scripts/clean.py` |
 
 ## Why the Makefile stays simple
+
+`make prepare-kobe-backend` is the main one-shot local DB prep path. It bootstraps the schemas, syncs `stats.players` and `stats.teams`, and loads the Kobe shot sample.
 
 - it only calls `uv` or `python`
 - it does not depend on shell pipes or Unix utilities

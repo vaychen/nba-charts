@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from dash import Dash, Input, Output, State, dcc, html
 from plotly.subplots import make_subplots
 
+from nba_charts.services.kobe_backend import load_kobe_data_snapshot
 from nba_charts.services.kobe_shots import (
     build_kobe_scope_summary,
     build_kobe_season_summary,
@@ -15,15 +16,9 @@ from nba_charts.services.kobe_shots import (
     filter_kobe_shots,
     kobe_season_list,
     kobe_shot_zone_options,
-    load_kobe_shot_dataset,
     scope_kobe_shots,
 )
 from nba_charts.settings import SETTINGS
-
-DATAFRAME = load_kobe_shot_dataset()
-SEASONS = kobe_season_list(DATAFRAME)
-SHOT_ZONES = kobe_shot_zone_options(DATAFRAME)
-SEASON_SUMMARY = build_kobe_season_summary(DATAFRAME)
 
 RESULT_COLORS = {
     "Made": "#C6842F",
@@ -341,18 +336,18 @@ def build_zone_figure(zone_summary, shot_made_flags: list[int]) -> go.Figure:
     return figure
 
 
-def build_trend_figure(active_season: str) -> go.Figure:
-    if SEASON_SUMMARY.empty:
+def build_trend_figure(active_season: str, season_summary) -> go.Figure:
+    if season_summary.empty:
         return _empty_figure("Career trend", "No season summary is available.")
 
     bar_colors = [
-        "#B66E28" if season == active_season else "#E2C18E" for season in SEASON_SUMMARY["season"]
+        "#B66E28" if season == active_season else "#E2C18E" for season in season_summary["season"]
     ]
     figure = make_subplots(specs=[[{"secondary_y": True}]])
     figure.add_trace(
         go.Bar(
-            x=SEASON_SUMMARY["season"],
-            y=SEASON_SUMMARY["made_shots"],
+            x=season_summary["season"],
+            y=season_summary["made_shots"],
             name="Made shots",
             marker={"color": bar_colors},
             hovertemplate="Season: %{x}<br>Made shots: %{y}<extra></extra>",
@@ -361,8 +356,8 @@ def build_trend_figure(active_season: str) -> go.Figure:
     )
     figure.add_trace(
         go.Scatter(
-            x=SEASON_SUMMARY["season"],
-            y=SEASON_SUMMARY["fg_pct"],
+            x=season_summary["season"],
+            y=season_summary["fg_pct"],
             name="FG% on known shots",
             mode="lines+markers",
             line={"color": "#4D3C31", "width": 3},
@@ -386,9 +381,16 @@ def build_trend_figure(active_season: str) -> go.Figure:
 
 
 def create_app() -> Dash:
+    snapshot = load_kobe_data_snapshot()
+    dataframe = snapshot.dataframe
+    seasons = kobe_season_list(dataframe)
+    shot_zones = kobe_shot_zone_options(dataframe)
+    season_summary = build_kobe_season_summary(dataframe)
+    backend_label = "Postgres" if snapshot.backend == "postgres" else "Sample file"
+
     app = Dash(__name__)
     app.title = "NBA Charts | Kobe Shot POC"
-    initial_season_index = len(SEASONS) - 1 if SEASONS else 0
+    initial_season_index = len(seasons) - 1 if seasons else 0
 
     app.layout = html.Div(
         style={
@@ -452,6 +454,14 @@ def create_app() -> Dash:
                             html.P(
                                 "30,697 shots across 20 seasons",
                                 style={"margin": "0 0 6px", "fontSize": "1rem", "color": "#2A211C"},
+                            ),
+                            html.P(
+                                f"Backend: {backend_label} ({snapshot.detail})",
+                                style={
+                                    "margin": "0 0 6px",
+                                    "fontSize": "0.95rem",
+                                    "color": "#5F5041",
+                                },
                             ),
                             html.P(
                                 "5,000 rows still have unknown outcomes in the source sample",
@@ -532,7 +542,7 @@ def create_app() -> Dash:
                         max=initial_season_index,
                         step=None,
                         value=initial_season_index,
-                        marks={index: season for index, season in enumerate(SEASONS)},
+                        marks={index: season for index, season in enumerate(seasons)},
                     ),
                     html.Div(
                         [
@@ -579,7 +589,7 @@ def create_app() -> Dash:
                                     dcc.Dropdown(
                                         id="kobe-zone-filter",
                                         options=[
-                                            {"label": zone, "value": zone} for zone in SHOT_ZONES
+                                            {"label": zone, "value": zone} for zone in shot_zones
                                         ],
                                         multi=True,
                                         placeholder="All zones",
@@ -695,9 +705,9 @@ def create_app() -> Dash:
         prevent_initial_call=True,
     )
     def advance_season(_: int, slider_value: int) -> int:
-        if not SEASONS:
+        if not seasons:
             return 0
-        if slider_value >= len(SEASONS) - 1:
+        if slider_value >= len(seasons) - 1:
             return 0
         return slider_value + 1
 
@@ -746,7 +756,7 @@ def create_app() -> Dash:
         str,
         str,
     ]:
-        if not SEASONS:
+        if not seasons:
             empty_figure = _empty_figure("Kobe shot POC", "No shot data is available.")
             return (
                 empty_figure,
@@ -766,18 +776,18 @@ def create_app() -> Dash:
                 "No favorite zone available",
             )
 
-        active_season = SEASONS[slider_value]
+        active_season = seasons[slider_value]
         cumulative = scope_mode == "cumulative"
         playoffs_only = "playoffs" in playoffs_flags
         selected_shot_flags = _selected_shot_flags(shot_made_flags)
         scope_df = scope_kobe_shots(
-            DATAFRAME,
+            dataframe,
             season=active_season,
             cumulative=cumulative,
             playoffs_only=playoffs_only,
         )
         view_df = filter_kobe_shots(
-            DATAFRAME,
+            dataframe,
             season=active_season,
             cumulative=cumulative,
             shot_result="All",
@@ -788,7 +798,7 @@ def create_app() -> Dash:
         scope_summary = build_kobe_scope_summary(scope_df)
         view_summary = build_kobe_view_summary(view_df)
         zone_summary = build_kobe_zone_summary(view_df)
-        trend_figure = build_trend_figure(active_season)
+        trend_figure = build_trend_figure(active_season, season_summary)
         shot_chart_figure = build_shot_chart_figure(
             view_df,
             active_season=active_season,

@@ -35,16 +35,17 @@ The repo tracks the target interpreter in `.python-version`, and the Makefile st
 make run-api
 make run-dashboard
 make run-kobe-shot-poc
+make prepare-kobe-backend
 make lint
 make test
 make sync-all
 ```
 
-The Kobe POC runs on `http://127.0.0.1:8051` by default and focuses on the sample shot archive with a Dash + Plotly workflow.
+The Kobe POC runs on `http://127.0.0.1:8051` by default. With `NBA_CHARTS_KOBE_DATA_SOURCE=auto` or `postgres`, it can read from the local Postgres backend after `make prepare-kobe-backend`, which now also fills `stats.players` and `stats.teams` from `nba_api`.
 
 ## Environment configuration
 
-Create a local `.env` and adjust values when you need database-backed ETL runs.
+Copy `.env.example` to `.env` and adjust values when you need database-backed ETL runs or Postgres-backed Kobe reports.
 
 Important variables:
 
@@ -57,8 +58,11 @@ Important variables:
 - `NBA_CHARTS_DB_HOST`
 - `NBA_CHARTS_DB_PORT`
 - `NBA_CHARTS_DB_NAME`
+- `NBA_CHARTS_DB_ADMIN_NAME`
 - `NBA_CHARTS_DB_USER`
 - `NBA_CHARTS_DB_PASSWORD`
+- `NBA_CHARTS_DB_CONNECT_TIMEOUT_SECONDS`
+- `NBA_CHARTS_KOBE_DATA_SOURCE`
 
 ## Docs
 

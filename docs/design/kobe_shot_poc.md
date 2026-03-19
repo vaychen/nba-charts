@@ -3,6 +3,7 @@
 ```mermaid
 flowchart LR
     sample[data/sample/kobe_career_shoot_made.csv] --> service[nba_charts.services.kobe_shots]
+    postgres[(analytics.kobe_shots)] --> service
     service --> api[/api/reports/kobe-shot-poc/]
     service --> dash[Dash + Plotly POC]
     api --> future[Future ECharts / D3 / BI clients]
@@ -14,10 +15,11 @@ flowchart LR
 - command: `make run-kobe-shot-poc`
 - direct command: `uv run nba-charts-kobe-shot-poc`
 - local API data endpoint for future tool options: `/api/reports/kobe-shot-poc`
+- backend mode: file, postgres, or auto via `NBA_CHARTS_KOBE_DATA_SOURCE`
 
 ## What the first POC does
 
-- loads `data/sample/kobe_career_shoot_made.csv`
+- loads from `analytics.kobe_shots` when Postgres is prepared, otherwise falls back to `data/sample/kobe_career_shoot_made.csv` in auto mode
 - defaults to a made-shot view so the prototype stays focused on Kobe's scoring footprint
 - lets you scrub season by season or switch to a cumulative career view
 - adds filters for `shot_made_flag` (`1` made, `0` missed), court zone, and playoff-only slices

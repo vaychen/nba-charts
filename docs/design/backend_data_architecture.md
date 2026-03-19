@@ -49,7 +49,7 @@ flowchart LR
 
 ## Local development stance
 
-- run Postgres locally on `localhost:5432`
+- run Postgres locally on `127.0.0.1:5432`
 - keep credentials in `.env` only and do not commit them
 - prefer `NBA_CHARTS_DB_DSN` when a single DSN is easiest
 - otherwise use `NBA_CHARTS_DB_HOST`, `NBA_CHARTS_DB_PORT`, `NBA_CHARTS_DB_NAME`, `NBA_CHARTS_DB_USER`, and `NBA_CHARTS_DB_PASSWORD`

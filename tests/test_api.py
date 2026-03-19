@@ -1,4 +1,8 @@
+import os
+
 from fastapi.testclient import TestClient
+
+os.environ["NBA_CHARTS_KOBE_DATA_SOURCE"] = "file"
 
 from nba_charts.api.main import app
 
@@ -24,13 +28,14 @@ def test_fg3m_report_endpoint_returns_filtered_data() -> None:
 def test_kobe_shot_poc_endpoint_returns_scope_and_view_summaries() -> None:
     response = client.get(
         "/api/reports/kobe-shot-poc",
-        params={"season": "2000-01", "shot_result": "Made"},
+        params=[("season", "2000-01"), ("shot_made_flag", 1), ("shot_made_flag", 0)],
     )
     assert response.status_code == 200
 
     payload = response.json()
     assert payload["tool_option"] == "dash-plotly"
+    assert payload["backend_source"] == "file"
     assert payload["season"] == "2000-01"
     assert payload["scope_summary"]["made_shots"] == 735
-    assert payload["view_summary"]["visible_shots"] == 735
-    assert payload["records"][0]["shot_result"] == "Made"
+    assert payload["view_summary"]["visible_shots"] == 1575
+    assert payload["records"][0]["shot_result"] in {"Made", "Missed"}

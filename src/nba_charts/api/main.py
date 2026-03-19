@@ -11,6 +11,7 @@ from nba_charts.services.datasets import (
     load_fg3m_dataset,
     season_list,
 )
+from nba_charts.services.kobe_backend import load_kobe_data_snapshot
 from nba_charts.services.kobe_shots import (
     build_kobe_scope_summary,
     build_kobe_season_summary,
@@ -19,14 +20,10 @@ from nba_charts.services.kobe_shots import (
     filter_kobe_shots,
     kobe_season_list,
     kobe_shot_zone_options,
-    load_kobe_shot_dataset,
     scope_kobe_shots,
 )
 from nba_charts.services.nba import get_shot_chart_records, render_shot_chart_image
 from nba_charts.settings import SETTINGS
-
-KOBE_DATAFRAME = load_kobe_shot_dataset()
-KOBE_SEASON_SUMMARY = build_kobe_season_summary(KOBE_DATAFRAME)
 
 
 def _serialize_report_frame(records: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -88,15 +85,20 @@ def create_app() -> FastAPI:
     def kobe_shot_poc(
         season: str | None = None,
         cumulative: bool = False,
-        shot_result: Literal["Made", "Missed", "Unknown", "Known", "All"] = "Made",
+        shot_result: Literal["Made", "Missed", "Unknown", "Known", "All"] = "All",
+        shot_made_flag: Annotated[list[int] | None, Query()] = None,
         playoffs_only: bool = False,
         zone: Annotated[list[str] | None, Query()] = None,
     ) -> dict[str, object]:
-        seasons = kobe_season_list(KOBE_DATAFRAME)
+        snapshot = load_kobe_data_snapshot()
+        dataframe = snapshot.dataframe
+        season_summary = build_kobe_season_summary(dataframe)
+        seasons = kobe_season_list(dataframe)
         active_season = season or (seasons[-1] if seasons else None)
         if not active_season:
             return {
                 "season": None,
+                "backend_source": snapshot.backend,
                 "available_seasons": [],
                 "available_zones": [],
                 "scope_summary": {},
@@ -107,16 +109,17 @@ def create_app() -> FastAPI:
             }
 
         scope_df = scope_kobe_shots(
-            KOBE_DATAFRAME,
+            dataframe,
             season=active_season,
             cumulative=cumulative,
             playoffs_only=playoffs_only,
         )
         view_df = filter_kobe_shots(
-            KOBE_DATAFRAME,
+            dataframe,
             season=active_season,
             cumulative=cumulative,
             shot_result=shot_result,
+            shot_made_flags=shot_made_flag,
             zone_basics=zone,
             playoffs_only=playoffs_only,
         )
@@ -126,14 +129,16 @@ def create_app() -> FastAPI:
             "season": active_season,
             "cumulative": cumulative,
             "shot_result": shot_result,
+            "shot_made_flags": shot_made_flag or [],
             "playoffs_only": playoffs_only,
             "tool_option": "dash-plotly",
+            "backend_source": snapshot.backend,
             "available_seasons": seasons,
-            "available_zones": kobe_shot_zone_options(KOBE_DATAFRAME),
+            "available_zones": kobe_shot_zone_options(dataframe),
             "scope_summary": build_kobe_scope_summary(scope_df),
             "view_summary": build_kobe_view_summary(view_df),
             "season_summary": _serialize_dataframe_records(
-                KOBE_SEASON_SUMMARY,
+                season_summary,
                 ["season", "attempts", "known_attempts", "made_shots", "fg_pct"],
             ),
             "zone_summary": _serialize_dataframe_records(
