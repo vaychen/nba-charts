@@ -7,8 +7,6 @@ import pandas as pd
 from nba_charts.services.datasets import season_sort_key
 from nba_charts.settings import SETTINGS
 
-SHOT_RESULT_OPTIONS = ["Made", "Missed", "Unknown", "Known", "All"]
-
 
 def load_kobe_shot_dataset(path: Path | None = None) -> pd.DataFrame:
     dataset_path = path or SETTINGS.sample_kobe_shot_path
@@ -26,7 +24,10 @@ def load_kobe_shot_dataset(path: Path | None = None) -> pd.DataFrame:
     ).fillna(0)
     normalized["loc_x"] = pd.to_numeric(normalized["loc_x"], errors="coerce").fillna(0)
     normalized["loc_y"] = pd.to_numeric(normalized["loc_y"], errors="coerce").fillna(0)
-    normalized["shot_result"] = normalized["shot_made_flag"].map({1.0: "Made", 0.0: "Missed"})
+    normalized["shot_made_flag"] = pd.to_numeric(
+        normalized["shot_made_flag"], errors="coerce"
+    ).astype("Int64")
+    normalized["shot_result"] = normalized["shot_made_flag"].map({1: "Made", 0: "Missed"})
     normalized["shot_result"] = normalized["shot_result"].fillna("Unknown")
     normalized["points_value"] = (
         normalized["shot_type"].eq("3PT Field Goal").map({True: 3, False: 2})
@@ -72,6 +73,7 @@ def filter_kobe_shots(
     season: str | None = None,
     cumulative: bool = False,
     shot_result: str = "Made",
+    shot_made_flags: list[int] | None = None,
     zone_basics: list[str] | None = None,
     playoffs_only: bool = False,
 ) -> pd.DataFrame:
@@ -81,6 +83,9 @@ def filter_kobe_shots(
         cumulative=cumulative,
         playoffs_only=playoffs_only,
     )
+
+    if shot_made_flags is not None:
+        filtered = filtered[filtered["shot_made_flag"].isin(shot_made_flags)]
 
     if shot_result == "Known":
         filtered = filtered[filtered["shot_result"] != "Unknown"]

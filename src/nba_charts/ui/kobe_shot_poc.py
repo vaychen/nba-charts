@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from typing import cast
 
 import plotly.graph_objects as go
 from dash import Dash, Input, Output, State, dcc, html
@@ -28,6 +29,25 @@ RESULT_COLORS = {
     "Made": "#C6842F",
     "Missed": "#8B4C39",
     "Unknown": "#65727D",
+}
+SHOT_FLAG_ORDER = [1, 0]
+SHOT_FLAG_CONFIG = {
+    1: {
+        "label": "Made (1)",
+        "short_label": "Made",
+        "color": RESULT_COLORS["Made"],
+        "symbol": "circle",
+        "size": 10,
+        "opacity": 0.76,
+    },
+    0: {
+        "label": "Missed (0)",
+        "short_label": "Missed",
+        "color": RESULT_COLORS["Missed"],
+        "symbol": "x",
+        "size": 8,
+        "opacity": 0.85,
+    },
 }
 BODY_FONT = "Trebuchet MS, Verdana, sans-serif"
 DISPLAY_FONT = "Georgia, Times New Roman, serif"
@@ -175,14 +195,46 @@ def _empty_figure(title: str, message: str) -> go.Figure:
     return figure
 
 
+def _selected_shot_flags(shot_made_flags: list[int] | None) -> list[int]:
+    if shot_made_flags is None:
+        return SHOT_FLAG_ORDER.copy()
+    return [flag for flag in SHOT_FLAG_ORDER if flag in shot_made_flags]
+
+
+def _shot_flag_view_label(shot_made_flags: list[int]) -> str:
+    if shot_made_flags == [1, 0]:
+        return "shot_made_flag 1 and 0"
+    if shot_made_flags == [1]:
+        return "shot_made_flag 1"
+    if shot_made_flags == [0]:
+        return "shot_made_flag 0"
+    return "no shot_made_flag selection"
+
+
+def _zone_chart_title(shot_made_flags: list[int]) -> str:
+    if shot_made_flags == [1]:
+        return "Made shots by zone"
+    if shot_made_flags == [0]:
+        return "Missed shots by zone"
+    return "Visible shots by zone"
+
+
+def _zone_chart_color(shot_made_flags: list[int]) -> str:
+    if shot_made_flags == [0]:
+        return RESULT_COLORS["Missed"]
+    if shot_made_flags == [1]:
+        return RESULT_COLORS["Made"]
+    return "#B66E28"
+
+
 def build_shot_chart_figure(
-    view_df, active_season: str, cumulative: bool, shot_result: str, zone_count: int
+    view_df, active_season: str, cumulative: bool, shot_made_flags: list[int], zone_count: int
 ) -> go.Figure:
     title_prefix = "Career through" if cumulative else "Season"
-    title_suffix = f"{shot_result} view" if shot_result != "All" else "All outcomes"
+    title_suffix = _shot_flag_view_label(shot_made_flags)
     figure = go.Figure()
 
-    if view_df.empty:
+    if view_df.empty or not shot_made_flags:
         empty = _empty_figure(
             title=f"Kobe shot map - {title_prefix} {active_season}",
             message="No shots match the current filters.",
@@ -192,17 +244,19 @@ def build_shot_chart_figure(
         empty.update_yaxes(range=[-60, 430], visible=False, scaleanchor="x", scaleratio=1)
         return empty
 
-    for result in ["Made", "Missed", "Unknown"]:
-        result_df = view_df[view_df["shot_result"] == result]
+    for shot_made_flag in shot_made_flags:
+        result_df = view_df[view_df["shot_made_flag"] == shot_made_flag]
         if result_df.empty:
             continue
+
+        shot_flag_config = SHOT_FLAG_CONFIG[shot_made_flag]
 
         figure.add_trace(
             go.Scattergl(
                 x=result_df["loc_x"],
                 y=result_df["loc_y"],
                 mode="markers",
-                name=result,
+                name=str(shot_flag_config["label"]),
                 customdata=result_df[
                     [
                         "game_date_label",
@@ -211,18 +265,21 @@ def build_shot_chart_figure(
                         "shot_type",
                         "shot_zone_basic",
                         "shot_distance",
+                        "shot_made_flag",
                     ]
                 ],
                 marker={
-                    "size": 8 if result == "Made" else 7,
-                    "color": RESULT_COLORS[result],
-                    "opacity": 0.76 if result == "Made" else 0.58,
-                    "line": {"color": "#FFF9ED", "width": 0.5},
+                    "size": shot_flag_config["size"],
+                    "symbol": shot_flag_config["symbol"],
+                    "color": shot_flag_config["color"],
+                    "opacity": shot_flag_config["opacity"],
+                    "line": {"color": "#FFF9ED", "width": 1},
                 },
                 hovertemplate=(
                     "<b>%{fullData.name}</b><br>Date: %{customdata[0]}<br>Matchup: %{customdata[1]}"
                     "<br>Opponent: %{customdata[2]}<br>Shot: %{customdata[3]}"
-                    "<br>Zone: %{customdata[4]}<br>Distance: %{customdata[5]} ft.<extra></extra>"
+                    "<br>Zone: %{customdata[4]}<br>Distance: %{customdata[5]} ft."
+                    "<br>shot_made_flag: %{customdata[6]}<extra></extra>"
                 ),
             )
         )
@@ -252,17 +309,17 @@ def build_shot_chart_figure(
     return figure
 
 
-def build_zone_figure(zone_summary, shot_result: str) -> go.Figure:
+def build_zone_figure(zone_summary, shot_made_flags: list[int]) -> go.Figure:
     if zone_summary.empty:
         return _empty_figure("Court zones", "Try widening the result or zone filters.")
 
-    title = "Made shots by zone" if shot_result == "Made" else "Visible shots by zone"
+    title = _zone_chart_title(shot_made_flags)
     figure = go.Figure(
         go.Bar(
             x=zone_summary["visible_shots"],
             y=zone_summary["shot_zone_basic"],
             orientation="h",
-            marker={"color": "#B66E28"},
+            marker={"color": _zone_chart_color(shot_made_flags)},
             customdata=zone_summary[["made_shots", "known_attempts", "fg_pct"]],
             text=zone_summary["visible_shots"],
             textposition="outside",
@@ -367,7 +424,8 @@ def create_app() -> Dash:
                                 (
                                     "First tool option: Dash + Plotly. This prototype turns the "
                                     "sample Kobe shot file into a scrubbable shot map, zone view, "
-                                    "and season rhythm panel."
+                                    "and season rhythm panel with `shot_made_flag` filters for 1 "
+                                    "(made) and 0 (missed)."
                                 ),
                                 style={
                                     "maxWidth": "760px",
@@ -498,22 +556,16 @@ def create_app() -> Dash:
                             html.Div(
                                 [
                                     html.Label(
-                                        "Shot result",
+                                        "shot_made_flag",
                                         style={"display": "block", "marginBottom": "8px"},
                                     ),
-                                    dcc.RadioItems(
-                                        id="kobe-shot-result",
+                                    dcc.Checklist(
+                                        id="kobe-shot-made-flags",
                                         options=[
-                                            {"label": option, "value": option}
-                                            for option in [
-                                                "Made",
-                                                "Known",
-                                                "All",
-                                                "Missed",
-                                                "Unknown",
-                                            ]
+                                            {"label": "1 = Made", "value": 1},
+                                            {"label": "0 = Missed", "value": 0},
                                         ],
-                                        value="Made",
+                                        value=[1, 0],
                                         inline=True,
                                     ),
                                 ]
@@ -667,14 +719,14 @@ def create_app() -> Dash:
         Output("kobe-favorite-zone-detail", "children"),
         Input("kobe-season-slider", "value"),
         Input("kobe-scope-mode", "value"),
-        Input("kobe-shot-result", "value"),
+        Input("kobe-shot-made-flags", "value"),
         Input("kobe-zone-filter", "value"),
         Input("kobe-playoffs-only", "value"),
     )
     def update_dashboard(
         slider_value: int,
         scope_mode: str,
-        shot_result: str,
+        shot_made_flags: list[int] | None,
         zone_basics: list[str] | None,
         playoffs_flags: list[str],
     ) -> tuple[
@@ -717,6 +769,7 @@ def create_app() -> Dash:
         active_season = SEASONS[slider_value]
         cumulative = scope_mode == "cumulative"
         playoffs_only = "playoffs" in playoffs_flags
+        selected_shot_flags = _selected_shot_flags(shot_made_flags)
         scope_df = scope_kobe_shots(
             DATAFRAME,
             season=active_season,
@@ -727,7 +780,8 @@ def create_app() -> Dash:
             DATAFRAME,
             season=active_season,
             cumulative=cumulative,
-            shot_result=shot_result,
+            shot_result="All",
+            shot_made_flags=selected_shot_flags,
             zone_basics=zone_basics or None,
             playoffs_only=playoffs_only,
         )
@@ -739,29 +793,39 @@ def create_app() -> Dash:
             view_df,
             active_season=active_season,
             cumulative=cumulative,
-            shot_result=shot_result,
+            shot_made_flags=selected_shot_flags,
             zone_count=len(zone_summary),
         )
-        zone_figure = build_zone_figure(zone_summary, shot_result=shot_result)
+        zone_figure = build_zone_figure(zone_summary, shot_made_flags=selected_shot_flags)
 
         focus_label = (
             f"Career through {active_season}" if cumulative else f"Season focus: {active_season}"
         )
-        unknown_count = int(scope_summary["attempts"] - scope_summary["known_attempts"])
+        scope_attempts = int(cast(int, scope_summary["attempts"]))
+        known_attempts = int(cast(int, scope_summary["known_attempts"]))
+        made_shots = int(cast(int, scope_summary["made_shots"]))
+        playoff_makes = int(cast(int, scope_summary["playoff_makes"]))
+        three_point_makes = int(cast(int, scope_summary["three_point_makes"]))
+        unknown_count = scope_attempts - known_attempts
         note = (
-            f"Scope includes {scope_summary['attempts']:,} shots and "
-            f"{scope_summary['known_attempts']:,} known outcomes; "
+            f"Scope includes {scope_attempts:,} shots and "
+            f"{known_attempts:,} known outcomes; "
             f"{unknown_count:,} rows still have withheld results in the sample."
         )
         if playoffs_only:
             note += " Playoff mode is active."
+        note += f" Visible symbols follow {_shot_flag_view_label(selected_shot_flags)}."
         if zone_basics:
             note += f" Zone filter narrowed the view to {len(zone_basics)} court zones."
 
         fg_pct = scope_summary["fg_pct"]
         fg_pct_value = f"{fg_pct:.1f}%" if isinstance(fg_pct, float) else "n/a"
         favorite_zone = str(scope_summary["favorite_zone"])
-        favorite_zone_makes = int(scope_summary["favorite_zone_makes"])
+        favorite_zone_makes = int(cast(int, scope_summary["favorite_zone_makes"]))
+        visible_detail = (
+            f"{view_summary['visible_makes']:,} made (1), "
+            f"{view_summary['visible_misses']:,} missed (0)"
+        )
         return (
             shot_chart_figure,
             zone_figure,
@@ -769,12 +833,12 @@ def create_app() -> Dash:
             focus_label,
             note,
             f"{view_summary['visible_shots']:,}",
-            f"{view_summary['visible_makes']:,} makes, {view_summary['visible_misses']:,} misses",
-            f"{scope_summary['made_shots']:,}",
-            f"{scope_summary['playoff_makes']:,} came in playoffs",
+            visible_detail,
+            f"{made_shots:,}",
+            f"{playoff_makes:,} came in playoffs",
             fg_pct_value,
-            f"Across {scope_summary['known_attempts']:,} known attempts in scope",
-            f"{scope_summary['three_point_makes']:,}",
+            f"Across {known_attempts:,} known attempts in scope",
+            f"{three_point_makes:,}",
             "Long-range makes inside the selected scope",
             favorite_zone,
             f"{favorite_zone_makes:,} makes came from this zone",

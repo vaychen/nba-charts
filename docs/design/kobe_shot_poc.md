@@ -20,7 +20,7 @@ flowchart LR
 - loads `data/sample/kobe_career_shoot_made.csv`
 - defaults to a made-shot view so the prototype stays focused on Kobe's scoring footprint
 - lets you scrub season by season or switch to a cumulative career view
-- adds filters for result type, court zone, and playoff-only slices
+- adds filters for `shot_made_flag` (`1` made, `0` missed), court zone, and playoff-only slices
 - pairs the shot map with zone totals and a season-level trend panel
 
 ## Why Dash + Plotly goes first

@@ -18,9 +18,26 @@ def test_load_kobe_shot_dataset_spans_full_career() -> None:
 
 def test_filter_kobe_shots_can_focus_on_makes_for_one_season() -> None:
     dataframe = load_kobe_shot_dataset()
-    filtered = filter_kobe_shots(dataframe, season="2000-01", shot_result="Made")
+    filtered = filter_kobe_shots(
+        dataframe,
+        season="2000-01",
+        shot_result="All",
+        shot_made_flags=[1],
+    )
     assert len(filtered) == 735
-    assert filtered["shot_result"].eq("Made").all()
+    assert bool(filtered["shot_result"].eq("Made").all())
+
+
+def test_filter_kobe_shots_can_show_both_known_outcomes() -> None:
+    dataframe = load_kobe_shot_dataset()
+    filtered = filter_kobe_shots(
+        dataframe,
+        season="2000-01",
+        shot_result="All",
+        shot_made_flags=[1, 0],
+    )
+    assert len(filtered) == 1575
+    assert set(filtered["shot_made_flag"].dropna().unique()) == {0, 1}
 
 
 def test_build_kobe_scope_summary_uses_known_attempts() -> None:
@@ -36,7 +53,12 @@ def test_build_kobe_scope_summary_uses_known_attempts() -> None:
 
 def test_build_kobe_zone_summary_prioritizes_busiest_zone() -> None:
     dataframe = load_kobe_shot_dataset()
-    filtered = filter_kobe_shots(dataframe, season="2000-01", shot_result="Made")
+    filtered = filter_kobe_shots(
+        dataframe,
+        season="2000-01",
+        shot_result="All",
+        shot_made_flags=[1],
+    )
     summary = build_kobe_zone_summary(filtered)
     assert summary.iloc[0]["shot_zone_basic"] == "Mid-Range"
     assert int(summary.iloc[0]["visible_shots"]) == 298
