@@ -91,6 +91,7 @@ Important variables:
 - `docs/design/career_points_bar_race.md`
 - `docs/design/dynamic_reports.md`
 - `docs/design/kobe_shot_poc.md`
+- `docs/records/runbooks/command_and_endpoint_catalog.md`
 - `docs/records/runbooks/cross_platform_workflow.md`
 - `docs/records/runbooks/local_postgres.md`
 - `docs/records/runbooks/windows_postgres_psql.md`
