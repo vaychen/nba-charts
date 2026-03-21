@@ -46,6 +46,7 @@ make run-api
 make run-dashboard
 make run-kobe-shot-poc
 make prepare-kobe-backend
+make prepare-career-points-race
 make lint
 make test
 make sync-all
@@ -54,6 +55,8 @@ make sync-all
 The Kobe POC runs on `http://127.0.0.1:8051` by default. With `NBA_CHARTS_KOBE_DATA_SOURCE=auto` or `postgres`, it can read from the local Postgres backend after `make prepare-kobe-backend`, which now also fills `stats.players` and `stats.teams` from `nba_api`.
 
 The ECharts Kobe POC is served by the API at `http://127.0.0.1:8000/echarts/kobe-shot-poc` after `make run-api`.
+
+The career points bar-race report is served by the API at `http://127.0.0.1:8000/echarts/career-points-race` after `make prepare-career-points-race` and `make run-api`.
 
 GitHub Actions now runs lint, type checks, and tests on both macOS and Windows in `.github/workflows/ci.yml`.
 
@@ -76,6 +79,8 @@ Important variables:
 - `NBA_CHARTS_DB_USER`
 - `NBA_CHARTS_DB_PASSWORD`
 - `NBA_CHARTS_DB_CONNECT_TIMEOUT_SECONDS`
+- `NBA_CHARTS_NBA_API_TIMEOUT_SECONDS`
+- `NBA_CHARTS_NBA_API_VERIFY_SSL`
 - `NBA_CHARTS_KOBE_DATA_SOURCE`
 
 ## Docs
@@ -83,6 +88,7 @@ Important variables:
 - `docs/README.md`
 - `docs/design/system_architecture.md`
 - `docs/design/backend_data_architecture.md`
+- `docs/design/career_points_bar_race.md`
 - `docs/design/dynamic_reports.md`
 - `docs/design/kobe_shot_poc.md`
 - `docs/records/runbooks/cross_platform_workflow.md`

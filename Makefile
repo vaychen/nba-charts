@@ -1,10 +1,10 @@
-.PHONY: help setup lock format lint test check run-api run-dashboard run-kobe-shot-poc db-bootstrap load-kobe-shots prepare-kobe-backend sync-players sync-teams sync-all clean
+.PHONY: help setup lock format lint test check run-api run-dashboard run-kobe-shot-poc db-bootstrap load-kobe-shots prepare-kobe-backend load-career-points-race prepare-career-points-race sync-players sync-teams sync-all clean
 
 UV ?= uv
 PYTHON_VERSION := $(strip $(file <.python-version))
 
 help:
-	@$(UV) run python -c "print('Targets: setup, lock, format, lint, test, check, run-api, run-dashboard, run-kobe-shot-poc, db-bootstrap, load-kobe-shots, prepare-kobe-backend, sync-players, sync-teams, sync-all, clean')"
+	@$(UV) run python -c "print('Targets: setup, lock, format, lint, test, check, run-api, run-dashboard, run-kobe-shot-poc, db-bootstrap, load-kobe-shots, prepare-kobe-backend, load-career-points-race, prepare-career-points-race, sync-players, sync-teams, sync-all, clean')"
 
 setup:
 	$(UV) python install $(PYTHON_VERSION)
@@ -44,6 +44,12 @@ load-kobe-shots:
 
 prepare-kobe-backend:
 	$(UV) run nba-charts-db prepare-kobe-backend
+
+load-career-points-race:
+	$(UV) run nba-charts-db load-career-points-race
+
+prepare-career-points-race:
+	$(UV) run nba-charts-db prepare-career-points-race
 
 sync-players:
 	$(UV) run nba-charts-sync players

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Charts | Career Points Race</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --bg-1: #f4ecdc;
+      --bg-2: #f8f5ef;
+      --ink: #2c231d;
+      --muted: #766452;
+      --line: rgba(109, 84, 56, 0.14);
+      --panel: rgba(255, 252, 246, 0.72);
+      --accent: #b86a24;
+      --accent-2: #7e4318;
+      --shadow: 0 22px 60px rgba(63, 42, 23, 0.08);
+      --display: Georgia, "Times New Roman", serif;
+      --body: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--body);
+      background:
+        radial-gradient(circle at left top, rgba(255, 249, 236, 0.9), transparent 34%),
+        radial-gradient(circle at right 15%, rgba(184, 106, 36, 0.1), transparent 24%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 18px 32px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .hero-card,
+    .meta-card,
+    .controls,
+    .summary-strip,
+    .chart-stage {
+      background: var(--panel);
+      border: 1px solid rgba(116, 90, 61, 0.12);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card,
+    .meta-card,
+    .controls,
+    .summary-strip {
+      padding: 20px 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.77rem;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-family: var(--display);
+      font-size: clamp(2.3rem, 5vw, 4.6rem);
+      line-height: 0.98;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-copy,
+    .meta-note,
+    .summary-label,
+    .summary-detail,
+    .season-scale,
+    .note,
+    .status {
+      color: var(--muted);
+    }
+
+    .hero-copy,
+    .meta-note,
+    .note,
+    .status {
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .meta-card {
+      display: grid;
+      gap: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(184, 106, 36, 0.1);
+      color: var(--accent-2);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .meta-item p {
+      margin: 0;
+    }
+
+    .meta-label {
+      margin-bottom: 6px !important;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .meta-value {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .controls {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .controls-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+    }
+
+    .season-focus {
+      margin: 0;
+      font-size: 1.22rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .play-button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 18px;
+      background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      color: #fff8ef;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .slider-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .season-slider {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .season-scale {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.83rem;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .control-block label {
+      display: block;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    select,
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid rgba(116, 90, 61, 0.14);
+      border-radius: 16px;
+      background: rgba(255, 253, 249, 0.9);
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .summary-item {
+      min-width: 0;
+    }
+
+    .summary-value {
+      margin: 0 0 6px;
+      font-family: var(--display);
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .summary-label,
+    .summary-detail {
+      margin: 0;
+    }
+
+    .summary-label {
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+    }
+
+    .chart-stage {
+      padding: 14px 14px 8px;
+    }
+
+    .chart-title {
+      margin: 0 0 8px 4px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    #chart {
+      width: 100%;
+      height: 760px;
+    }
+
+    .status {
+      display: none;
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(127, 29, 29, 0.1);
+      color: #7b2d2d;
+    }
+
+    .status.error { display: block; }
+
+    @media (max-width: 980px) {
+      .hero,
+      .summary-strip {
+        grid-template-columns: 1fr;
+      }
+
+      #chart {
+        height: 620px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        padding: 16px 12px 24px;
+      }
+
+      .hero-card,
+      .meta-card,
+      .controls,
+      .summary-strip,
+      .chart-stage {
+        border-radius: 18px;
+      }
+
+      .controls-top {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      #chart {
+        height: 520px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <article class="hero-card">
+        <p class="eyebrow">NBA Charts</p>
+        <h1>Career points race</h1>
+        <p class="hero-copy">
+          A season-by-season bar race for regular-season career scoring leaders, shaped in PostgreSQL and played back in ECharts.
+          This version leans harder into the classic ECharts race style so the motion and ranking changes stay central.
+        </p>
+      </article>
+
+      <aside class="meta-card">
+        <span class="pill" id="backend-pill">Backend: loading</span>
+        <div class="meta-item">
+          <p class="meta-label">Coverage</p>
+          <p class="meta-value" id="coverage-pill">Loading seasons</p>
+        </div>
+        <div class="meta-item">
+          <p class="meta-label">Pattern</p>
+          <p class="meta-value">ECharts bar-race timeline</p>
+        </div>
+        <p class="meta-note" id="summary-note">Loading report metadata...</p>
+      </aside>
+    </section>
+
+    <section class="controls">
+      <div class="controls-top">
+        <div>
+          <p class="eyebrow">Playback</p>
+          <p class="season-focus" id="season-focus">Loading season</p>
+        </div>
+        <button class="play-button" id="play-button" type="button">Play</button>
+      </div>
+
+      <div class="slider-wrap">
+        <input class="season-slider" id="season-slider" type="range" min="0" max="0" value="0" step="1">
+        <div class="season-scale">
+          <span id="season-start">-</span>
+          <span id="season-current">-</span>
+          <span id="season-end">-</span>
+        </div>
+      </div>
+
+      <div class="control-grid">
+        <div class="control-block">
+          <label for="top-n">Top players shown</label>
+          <select id="top-n">
+            <option value="8">Top 8</option>
+            <option value="10">Top 10</option>
+            <option value="12" selected>Top 12</option>
+            <option value="15">Top 15</option>
+            <option value="20">Top 20</option>
+          </select>
+        </div>
+        <div class="control-block">
+          <label for="highlight-player-id">Highlight player id</label>
+          <input id="highlight-player-id" type="number" min="1" placeholder="Optional player id">
+        </div>
+      </div>
+
+      <div class="status" id="status-box"></div>
+    </section>
+
+    <section class="summary-strip">
+      <div class="summary-item">
+        <p class="summary-label">Leader in frame</p>
+        <p class="summary-value" id="leader-name">-</p>
+        <p class="summary-detail" id="leader-detail">-</p>
+      </div>
+      <div class="summary-item">
+        <p class="summary-label">Career points</p>
+        <p class="summary-value" id="leader-points">-</p>
+        <p class="summary-detail" id="leader-rank-detail">-</p>
+      </div>
+      <div class="summary-item">
+        <p class="summary-label">Frame size</p>
+        <p class="summary-value" id="players-shown">-</p>
+        <p class="summary-detail" id="players-shown-detail">-</p>
+      </div>
+    </section>
+
+    <section class="chart-stage">
+      <p class="chart-title">End-of-season career scoring leaderboard</p>
+      <div id="chart"></div>
+    </section>
+  </main>
+
+  <script>
+    const chart = echarts.init(document.getElementById('chart'));
+    const API_URL = '/api/reports/career-points-race';
+    const PLAY_INTERVAL_MS = 1300;
+    const COLOR_PALETTE = ['#b96c27', '#c67f35', '#d29347', '#dda85f', '#e7bc78', '#9c5721', '#7f451d', '#c48c5f'];
+
+    const state = {
+      seasons: [],
+      frames: [],
+      frameIndex: 0,
+      topN: 12,
+      highlightPlayerId: null,
+      playing: false,
+      timerId: null,
+      backendSource: '',
+      backendDetail: '',
+    };
+
+    const elements = {
+      backendPill: document.getElementById('backend-pill'),
+      coveragePill: document.getElementById('coverage-pill'),
+      seasonFocus: document.getElementById('season-focus'),
+      seasonSlider: document.getElementById('season-slider'),
+      seasonStart: document.getElementById('season-start'),
+      seasonCurrent: document.getElementById('season-current'),
+      seasonEnd: document.getElementById('season-end'),
+      playButton: document.getElementById('play-button'),
+      topN: document.getElementById('top-n'),
+      highlightPlayerId: document.getElementById('highlight-player-id'),
+      summaryNote: document.getElementById('summary-note'),
+      statusBox: document.getElementById('status-box'),
+      leaderName: document.getElementById('leader-name'),
+      leaderDetail: document.getElementById('leader-detail'),
+      leaderPoints: document.getElementById('leader-points'),
+      leaderRankDetail: document.getElementById('leader-rank-detail'),
+      playersShown: document.getElementById('players-shown'),
+      playersShownDetail: document.getElementById('players-shown-detail'),
+    };
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat('en-US').format(value || 0);
+    }
+
+    function setStatus(message, isError = false) {
+      elements.statusBox.textContent = message;
+      elements.statusBox.className = isError ? 'status error' : 'status';
+    }
+
+    function stopPlayback() {
+      if (state.timerId !== null) {
+        window.clearInterval(state.timerId);
+        state.timerId = null;
+      }
+      state.playing = false;
+      elements.playButton.textContent = 'Play';
+    }
+
+    function updateSummary(frame) {
+      const leader = frame.leaders[0];
+      if (!leader) {
+        elements.leaderName.textContent = 'n/a';
+        elements.leaderDetail.textContent = 'No data in this frame';
+        elements.leaderPoints.textContent = '0';
+        elements.leaderRankDetail.textContent = 'No ranking available';
+        elements.playersShown.textContent = '0';
+        elements.playersShownDetail.textContent = 'No visible players';
+        return;
+      }
+
+      elements.leaderName.textContent = leader.player_name;
+      elements.leaderDetail.textContent = `${leader.team_abbreviation || 'NBA'} | season points ${formatNumber(leader.season_points)}`;
+      elements.leaderPoints.textContent = formatNumber(leader.career_points);
+      elements.leaderRankDetail.textContent = `Career rank #${leader.career_points_rank} by ${frame.season}`;
+      elements.playersShown.textContent = formatNumber(frame.leaders.length);
+      elements.playersShownDetail.textContent = `Top ${state.topN} frame${state.highlightPlayerId ? ' with highlight' : ''}`;
+    }
+
+    function renderFrame() {
+      const frame = state.frames[state.frameIndex];
+      if (!frame) {
+        return;
+      }
+
+      const sortedLeaders = [...frame.leaders].sort((left, right) => left.career_points - right.career_points);
+      const maxValue = Math.max(...sortedLeaders.map((row) => row.career_points), 1);
+
+      chart.setOption({
+        animationDuration: 0,
+        animationDurationUpdate: PLAY_INTERVAL_MS - 100,
+        animationEasing: 'linear',
+        animationEasingUpdate: 'linear',
+        grid: { left: 148, right: 72, top: 48, bottom: 48 },
+        xAxis: {
+          type: 'value',
+          max: maxValue * 1.08,
+          splitNumber: 5,
+          axisLabel: {
+            color: '#7a6653',
+            formatter(value) {
+              return formatNumber(value);
+            },
+          },
+          splitLine: { lineStyle: { color: 'rgba(109, 84, 56, 0.12)' } },
+        },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          max: state.topN - 1,
+          axisTick: { show: false },
+          axisLine: { show: false },
+          axisLabel: {
+            color: '#30261f',
+            fontSize: 14,
+            margin: 16,
+          },
+          data: sortedLeaders.map((row) => row.player_name),
+        },
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(36, 28, 22, 0.92)',
+          borderWidth: 0,
+          textStyle: { color: '#fff7eb' },
+          formatter(params) {
+            const row = params.data.raw;
+            return [
+              `<strong>${row.player_name}</strong>`,
+              `Season: ${frame.season}`,
+              `Team: ${row.team_abbreviation || 'NBA'}`,
+              `Career points: ${formatNumber(row.career_points)}`,
+              `Season points: ${formatNumber(row.season_points)}`,
+              `Career rank: #${row.career_points_rank}`,
+            ].join('<br>');
+          },
+        },
+        graphic: [
+          {
+            type: 'text',
+            right: 28,
+            bottom: 16,
+            z: 100,
+            style: {
+              text: frame.season,
+              fill: 'rgba(184, 106, 36, 0.18)',
+              font: '700 94px Georgia, Times New Roman, serif',
+            },
+          },
+        ],
+        series: [
+          {
+            type: 'bar',
+            realtimeSort: true,
+            barCategoryGap: '28%',
+            data: sortedLeaders.map((row, index) => ({
+              value: row.career_points,
+              raw: row,
+              itemStyle: {
+                color: state.highlightPlayerId && row.player_id === state.highlightPlayerId
+                  ? '#7f1d1d'
+                  : COLOR_PALETTE[index % COLOR_PALETTE.length],
+                borderRadius: [0, 10, 10, 0],
+              },
+            })),
+            label: {
+              show: true,
+              position: 'right',
+              valueAnimation: true,
+              color: '#3f3024',
+              fontSize: 13,
+              formatter(params) {
+                return formatNumber(params.value);
+              },
+            },
+            emphasis: {
+              focus: 'series',
+            },
+          },
+        ],
+      }, true);
+
+      elements.seasonFocus.textContent = `Season frame: ${frame.season}`;
+      elements.seasonCurrent.textContent = frame.season;
+      updateSummary(frame);
+    }
+
+    async function fetchPayload() {
+      const params = new URLSearchParams();
+      params.set('top_n', String(state.topN));
+      if (state.highlightPlayerId) {
+        params.set('highlight_player_id', String(state.highlightPlayerId));
+      }
+      const response = await fetch(`${API_URL}?${params.toString()}`, { headers: { Accept: 'application/json' } });
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function refreshData() {
+      try {
+        setStatus('');
+        const payload = await fetchPayload();
+        state.seasons = payload.seasons || [];
+        state.frames = payload.frames || [];
+        state.backendSource = payload.backend_source || 'postgres';
+        state.backendDetail = payload.backend_detail || '';
+        state.frameIndex = Math.min(state.frameIndex, Math.max(state.frames.length - 1, 0));
+
+        elements.backendPill.textContent = `Backend: ${state.backendSource}`;
+        elements.coveragePill.textContent = state.seasons.length
+          ? `${state.seasons[0]} to ${state.seasons[state.seasons.length - 1]}`
+          : 'No seasons loaded';
+        elements.summaryNote.textContent = state.seasons.length
+          ? `Starting from ${state.seasons[0]}, the first season returned consistently by the official league-wide NBA API leaderboard feed. Source detail: ${state.backendDetail}.`
+          : 'No career-points frames are loaded yet. Run the ETL loader first.';
+
+        elements.seasonSlider.max = String(Math.max(state.frames.length - 1, 0));
+        elements.seasonSlider.value = String(state.frameIndex);
+        elements.seasonStart.textContent = state.seasons[0] || '-';
+        elements.seasonEnd.textContent = state.seasons[state.seasons.length - 1] || '-';
+
+        renderFrame();
+      } catch (error) {
+        console.error(error);
+        stopPlayback();
+        setStatus(`Unable to load career points race data. ${error.message}`, true);
+      }
+    }
+
+    function advanceFrame() {
+      if (!state.frames.length) {
+        return;
+      }
+      state.frameIndex = state.frameIndex >= state.frames.length - 1 ? 0 : state.frameIndex + 1;
+      elements.seasonSlider.value = String(state.frameIndex);
+      renderFrame();
+    }
+
+    function togglePlayback() {
+      if (!state.frames.length) {
+        return;
+      }
+      state.playing = !state.playing;
+      elements.playButton.textContent = state.playing ? 'Pause' : 'Play';
+      if (state.playing) {
+        state.timerId = window.setInterval(advanceFrame, PLAY_INTERVAL_MS);
+      } else {
+        stopPlayback();
+      }
+    }
+
+    elements.playButton.addEventListener('click', togglePlayback);
+    elements.seasonSlider.addEventListener('input', (event) => {
+      state.frameIndex = Number(event.target.value);
+      renderFrame();
+    });
+    elements.topN.addEventListener('change', async (event) => {
+      state.topN = Number(event.target.value);
+      stopPlayback();
+      await refreshData();
+    });
+    elements.highlightPlayerId.addEventListener('change', async (event) => {
+      const value = event.target.value.trim();
+      state.highlightPlayerId = value ? Number(value) : null;
+      stopPlayback();
+      await refreshData();
+    });
+
+    window.addEventListener('resize', () => chart.resize());
+
+    refreshData();
+  </script>
+</body>
+</html>

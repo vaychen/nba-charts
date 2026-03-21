@@ -17,6 +17,13 @@ def _int_env(name: str, default: int) -> int:
     return int(raw_value)
 
 
+def _bool_env(name: str, default: bool) -> bool:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    return raw_value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _lower_env(name: str, default: str) -> str:
     raw_value = os.getenv(name)
     if raw_value is None:
@@ -46,6 +53,8 @@ class Settings:
     db_user: str
     db_password: str
     db_connect_timeout_seconds: int
+    nba_api_timeout_seconds: int
+    nba_api_verify_ssl: bool
     kobe_data_source: Literal["auto", "file", "postgres"]
     sample_fg3m_path: Path
     sample_kobe_shot_path: Path
@@ -84,6 +93,8 @@ def get_settings() -> Settings:
         db_user=os.getenv("NBA_CHARTS_DB_USER", "postgres"),
         db_password=os.getenv("NBA_CHARTS_DB_PASSWORD", "postgres"),
         db_connect_timeout_seconds=_int_env("NBA_CHARTS_DB_CONNECT_TIMEOUT_SECONDS", 10),
+        nba_api_timeout_seconds=_int_env("NBA_CHARTS_NBA_API_TIMEOUT_SECONDS", 30),
+        nba_api_verify_ssl=_bool_env("NBA_CHARTS_NBA_API_VERIFY_SSL", False),
         kobe_data_source=_kobe_data_source_env(),
         sample_fg3m_path=ROOT_DIR / "data" / "sample" / "fg3m_by_season_sample.json",
         sample_kobe_shot_path=ROOT_DIR / "data" / "sample" / "kobe_career_shoot_made.csv",

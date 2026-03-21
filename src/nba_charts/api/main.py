@@ -6,6 +6,10 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 
+from nba_charts.services.career_points import (
+    build_career_points_payload,
+    load_career_points_frames_from_postgres,
+)
 from nba_charts.services.datasets import (
     filter_fg3m_dataset,
     leaderboard,
@@ -66,6 +70,10 @@ def create_app() -> FastAPI:
     @app.get("/echarts/kobe-shot-poc")
     def kobe_shot_poc_echarts() -> FileResponse:
         return FileResponse(STATIC_ROOT / "kobe_shot_poc_echarts.html", media_type="text/html")
+
+    @app.get("/echarts/career-points-race")
+    def career_points_race_echarts() -> FileResponse:
+        return FileResponse(STATIC_ROOT / "career_points_race_echarts.html", media_type="text/html")
 
     @app.get("/api/reports/fg3m")
     def fg3m_report(
@@ -175,6 +183,27 @@ def create_app() -> FastAPI:
                 ],
             ),
         }
+
+    @app.get("/api/reports/career-points-race")
+    def career_points_race(
+        top_n: int = 12,
+        highlight_player_id: int | None = None,
+    ) -> dict[str, object]:
+        snapshot = load_career_points_frames_from_postgres()
+        payload = build_career_points_payload(
+            snapshot.dataframe,
+            top_n=max(3, min(top_n, 25)),
+            highlight_player_id=highlight_player_id,
+        )
+        payload.update(
+            {
+                "backend_source": snapshot.backend,
+                "backend_detail": snapshot.detail,
+                "tool_option": "echarts-bar-race",
+                "title": "NBA career points race",
+            }
+        )
+        return payload
 
     @app.get("/api/shot-chart")
     def shot_chart(player_id: int, season: str) -> dict[str, object]:

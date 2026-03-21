@@ -24,6 +24,8 @@ NBA_CHARTS_DB_ADMIN_NAME=postgres
 NBA_CHARTS_DB_USER=postgres
 NBA_CHARTS_DB_PASSWORD=123456789
 NBA_CHARTS_DB_CONNECT_TIMEOUT_SECONDS=10
+NBA_CHARTS_NBA_API_TIMEOUT_SECONDS=30
+NBA_CHARTS_NBA_API_VERIFY_SSL=false
 NBA_CHARTS_KOBE_DATA_SOURCE=auto
 ```
 
@@ -69,6 +71,18 @@ Direct command:
 
 ```bash
 uv run nba-charts-db prepare-kobe-backend
+```
+
+If you want the one-shot setup for the career-points bar-race backend:
+
+```bash
+make prepare-career-points-race
+```
+
+Direct command:
+
+```bash
+uv run nba-charts-db prepare-career-points-race
 ```
 
 ## Manual fallback
@@ -126,5 +140,6 @@ with connect(dsn, connect_timeout=10) as conn:
 
 - the Kobe POC and `/api/reports/kobe-shot-poc` now support the Postgres backend
 - `make prepare-kobe-backend` now also populates `stats.players` and `stats.teams`
+- `make prepare-career-points-race` loads `analytics.player_season_points` and `analytics.player_career_points_frames` from `nba_api`
 - in `auto` mode, the app falls back to the sample file if Postgres is unavailable or empty
 - `.env` can stay local even though `.env.example` now includes the shared local password value
