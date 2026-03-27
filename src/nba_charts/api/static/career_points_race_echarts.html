@@ -7,17 +7,17 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
   <style>
     :root {
-      --bg-1: #f4ecdc;
-      --bg-2: #f8f5ef;
-      --ink: #2c231d;
-      --muted: #766452;
-      --line: rgba(109, 84, 56, 0.14);
-      --panel: rgba(255, 252, 246, 0.72);
-      --accent: #b86a24;
-      --accent-2: #7e4318;
-      --shadow: 0 22px 60px rgba(63, 42, 23, 0.08);
-      --display: Georgia, "Times New Roman", serif;
-      --body: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
+      --bg-top: #efe4cf;
+      --bg-bottom: #f8f4ec;
+      --panel: rgba(255, 252, 246, 0.76);
+      --panel-border: rgba(122, 91, 56, 0.12);
+      --text-main: #2b221b;
+      --text-muted: #71604f;
+      --accent: #ad6425;
+      --accent-deep: #7d4117;
+      --shadow: 0 24px 54px rgba(67, 46, 26, 0.1);
+      --display-font: Georgia, "Times New Roman", serif;
+      --body-font: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
     }
 
     * { box-sizing: border-box; }
@@ -25,45 +25,49 @@
     body {
       margin: 0;
       min-height: 100vh;
-      color: var(--ink);
-      font-family: var(--body);
+      color: var(--text-main);
+      font-family: var(--body-font);
       background:
-        radial-gradient(circle at left top, rgba(255, 249, 236, 0.9), transparent 34%),
-        radial-gradient(circle at right 15%, rgba(184, 106, 36, 0.1), transparent 24%),
-        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+        radial-gradient(circle at left top, rgba(255, 250, 240, 0.96), transparent 34%),
+        radial-gradient(circle at right 20%, rgba(173, 100, 37, 0.12), transparent 26%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
     }
 
     .shell {
-      max-width: 1440px;
+      max-width: 1480px;
       margin: 0 auto;
-      padding: 24px 18px 32px;
+      padding: 24px 18px 30px;
     }
 
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
-      gap: 18px;
-      align-items: start;
-      margin-bottom: 14px;
-    }
-
-    .hero-card,
-    .meta-card,
+    .hero,
     .controls,
-    .summary-strip,
-    .chart-stage {
+    .leaderboard-shell,
+    .leader-card,
+    .meta-card,
+    .status {
       background: var(--panel);
-      border: 1px solid rgba(116, 90, 61, 0.12);
-      border-radius: 24px;
+      border: 1px solid var(--panel-border);
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
     }
 
-    .hero-card,
-    .meta-card,
+    .hero,
     .controls,
-    .summary-strip {
-      padding: 20px 22px;
+    .leaderboard-shell {
+      border-radius: 26px;
+    }
+
+    .hero,
+    .controls {
+      padding: 22px 24px;
+      margin-bottom: 16px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.72fr);
+      gap: 18px;
+      align-items: start;
     }
 
     .eyebrow {
@@ -76,33 +80,27 @@
 
     h1 {
       margin: 0 0 12px;
-      font-family: var(--display);
-      font-size: clamp(2.3rem, 5vw, 4.6rem);
+      font-family: var(--display-font);
+      font-size: clamp(2.5rem, 5vw, 4.9rem);
       line-height: 0.98;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
 
     .hero-copy,
     .meta-note,
-    .summary-label,
-    .summary-detail,
-    .season-scale,
-    .note,
-    .status {
-      color: var(--muted);
-    }
-
-    .hero-copy,
-    .meta-note,
-    .note,
+    .summary-note,
     .status {
       margin: 0;
-      line-height: 1.6;
+      color: var(--text-muted);
+      line-height: 1.65;
     }
 
     .meta-card {
       display: grid;
       gap: 16px;
+      border-radius: 22px;
+      padding: 18px 18px 20px;
+      background: linear-gradient(180deg, rgba(255, 252, 246, 0.8), rgba(245, 232, 209, 0.72));
     }
 
     .pill {
@@ -112,58 +110,71 @@
       width: fit-content;
       padding: 8px 12px;
       border-radius: 999px;
-      background: rgba(184, 106, 36, 0.1);
-      color: var(--accent-2);
+      background: rgba(173, 100, 37, 0.1);
+      color: var(--accent-deep);
       font-size: 0.9rem;
       font-weight: 700;
     }
 
-    .meta-item p {
-      margin: 0;
-    }
-
     .meta-label {
-      margin-bottom: 6px !important;
+      margin: 0 0 6px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+      color: var(--text-muted);
       font-size: 0.78rem;
-      color: var(--muted);
     }
 
     .meta-value {
+      margin: 0;
+      color: var(--text-main);
       font-size: 1.02rem;
       font-weight: 700;
-      color: var(--ink);
     }
 
     .controls {
       display: grid;
       gap: 16px;
-      margin-bottom: 14px;
     }
 
     .controls-top {
       display: flex;
-      justify-content: space-between;
       align-items: end;
-      gap: 14px;
+      justify-content: space-between;
+      gap: 16px;
     }
 
     .season-focus {
       margin: 0;
-      font-size: 1.22rem;
+      color: var(--text-main);
+      font-size: 1.24rem;
       font-weight: 700;
-      color: var(--ink);
     }
 
-    .play-button {
+    .button-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .play-button,
+    .ghost-button {
       border: 0;
       border-radius: 999px;
       padding: 11px 18px;
-      background: linear-gradient(135deg, var(--accent-2), var(--accent));
-      color: #fff8ef;
       font-weight: 700;
       cursor: pointer;
+      font-family: inherit;
+    }
+
+    .play-button {
+      background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+      color: #fff8ee;
+    }
+
+    .ghost-button {
+      background: rgba(121, 83, 47, 0.08);
+      color: var(--text-main);
     }
 
     .slider-wrap {
@@ -180,12 +191,13 @@
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      font-size: 0.83rem;
+      color: var(--text-muted);
+      font-size: 0.84rem;
     }
 
     .control-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 14px;
     }
 
@@ -194,63 +206,123 @@
       margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.07em;
+      color: var(--text-muted);
       font-size: 0.8rem;
-      color: var(--muted);
     }
 
     select,
     input[type="number"] {
       width: 100%;
       padding: 12px 14px;
-      border: 1px solid rgba(116, 90, 61, 0.14);
       border-radius: 16px;
-      background: rgba(255, 253, 249, 0.9);
-      color: var(--ink);
+      border: 1px solid rgba(121, 83, 47, 0.14);
+      background: rgba(255, 253, 249, 0.92);
+      color: var(--text-main);
       font: inherit;
     }
 
-    .summary-strip {
+    .leaderboard-shell {
+      padding: 14px;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 14px;
+      grid-template-columns: minmax(280px, 0.33fr) minmax(0, 1fr);
+      gap: 14px;
+      align-items: stretch;
     }
 
-    .summary-item {
-      min-width: 0;
+    .leader-card {
+      border-radius: 22px;
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(255, 251, 243, 0.92), rgba(241, 227, 201, 0.78));
+      display: grid;
+      gap: 14px;
+      align-content: start;
     }
 
-    .summary-value {
+    .leader-head {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+    }
+
+    .headshot {
+      width: 96px;
+      height: 96px;
+      border-radius: 24px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(121, 83, 47, 0.12);
+    }
+
+    .leader-rank {
       margin: 0 0 6px;
-      font-family: var(--display);
-      font-size: clamp(1.5rem, 3vw, 2.5rem);
-      color: var(--ink);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .summary-label,
-    .summary-detail {
-      margin: 0;
-    }
-
-    .summary-label {
-      margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
       font-size: 0.78rem;
     }
 
+    .leader-name {
+      margin: 0 0 4px;
+      font-family: var(--display-font);
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .leader-team {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .leader-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .leader-stat {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 253, 249, 0.7);
+      border: 1px solid rgba(121, 83, 47, 0.1);
+    }
+
+    .leader-stat-label,
+    .leader-stat-detail {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .leader-stat-label {
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.75rem;
+    }
+
+    .leader-stat-value {
+      margin: 0 0 4px;
+      color: var(--text-main);
+      font-family: var(--display-font);
+      font-size: 1.7rem;
+      line-height: 1;
+    }
+
+    .summary-note {
+      padding-top: 4px;
+      border-top: 1px solid rgba(121, 83, 47, 0.1);
+    }
+
     .chart-stage {
-      padding: 14px 14px 8px;
+      min-width: 0;
     }
 
     .chart-title {
-      margin: 0 0 8px 4px;
+      margin: 0 0 8px 2px;
+      color: var(--text-main);
       font-size: 1rem;
       font-weight: 700;
-      color: var(--ink);
     }
 
     #chart {
@@ -269,60 +341,60 @@
 
     .status.error { display: block; }
 
-    @media (max-width: 980px) {
+    @media (max-width: 1080px) {
       .hero,
-      .summary-strip {
+      .leaderboard-shell {
         grid-template-columns: 1fr;
       }
 
-      #chart {
-        height: 620px;
-      }
+      #chart { height: 640px; }
     }
 
-    @media (max-width: 640px) {
-      .shell {
-        padding: 16px 12px 24px;
-      }
-
-      .hero-card,
-      .meta-card,
+    @media (max-width: 680px) {
+      .shell { padding: 16px 12px 24px; }
+      .hero,
       .controls,
-      .summary-strip,
-      .chart-stage {
+      .leaderboard-shell,
+      .leader-card,
+      .status { border-radius: 18px; }
+      .controls-top {
+        flex-direction: column;
+        align-items: start;
+      }
+      .leader-head {
+        grid-template-columns: 80px minmax(0, 1fr);
+      }
+      .headshot {
+        width: 80px;
+        height: 80px;
         border-radius: 18px;
       }
-
-      .controls-top {
-        align-items: start;
-        flex-direction: column;
+      .leader-stat-grid {
+        grid-template-columns: 1fr;
       }
-
-      #chart {
-        height: 520px;
-      }
+      #chart { height: 520px; }
     }
   </style>
 </head>
 <body>
   <main class="shell">
     <section class="hero">
-      <article class="hero-card">
+      <article>
         <p class="eyebrow">NBA Charts</p>
         <h1>Career points race</h1>
         <p class="hero-copy">
-          A season-by-season bar race for regular-season career scoring leaders, shaped in PostgreSQL and played back in ECharts.
-          This version leans harder into the classic ECharts race style so the motion and ranking changes stay central.
+          A season-by-season bar race for regular-season career scoring leaders. The report now carries historical players forward,
+          so retired legends remain in later frames when their cumulative totals still rank near the top.
         </p>
       </article>
 
       <aside class="meta-card">
         <span class="pill" id="backend-pill">Backend: loading</span>
-        <div class="meta-item">
+        <div>
           <p class="meta-label">Coverage</p>
           <p class="meta-value" id="coverage-pill">Loading seasons</p>
         </div>
-        <div class="meta-item">
+        <div>
           <p class="meta-label">Pattern</p>
           <p class="meta-value">ECharts bar-race timeline</p>
         </div>
@@ -336,7 +408,10 @@
           <p class="eyebrow">Playback</p>
           <p class="season-focus" id="season-focus">Loading season</p>
         </div>
-        <button class="play-button" id="play-button" type="button">Play</button>
+        <div class="button-row">
+          <button class="ghost-button" id="restart-button" type="button">Restart</button>
+          <button class="play-button" id="play-button" type="button">Pause</button>
+        </div>
       </div>
 
       <div class="slider-wrap">
@@ -360,6 +435,14 @@
           </select>
         </div>
         <div class="control-block">
+          <label for="play-speed">Playback speed</label>
+          <select id="play-speed">
+            <option value="1700">Slow</option>
+            <option value="1300" selected>Normal</option>
+            <option value="950">Fast</option>
+          </select>
+        </div>
+        <div class="control-block">
           <label for="highlight-player-id">Highlight player id</label>
           <input id="highlight-player-id" type="number" min="1" placeholder="Optional player id">
         </div>
@@ -368,35 +451,60 @@
       <div class="status" id="status-box"></div>
     </section>
 
-    <section class="summary-strip">
-      <div class="summary-item">
-        <p class="summary-label">Leader in frame</p>
-        <p class="summary-value" id="leader-name">-</p>
-        <p class="summary-detail" id="leader-detail">-</p>
-      </div>
-      <div class="summary-item">
-        <p class="summary-label">Career points</p>
-        <p class="summary-value" id="leader-points">-</p>
-        <p class="summary-detail" id="leader-rank-detail">-</p>
-      </div>
-      <div class="summary-item">
-        <p class="summary-label">Frame size</p>
-        <p class="summary-value" id="players-shown">-</p>
-        <p class="summary-detail" id="players-shown-detail">-</p>
-      </div>
-    </section>
+    <section class="leaderboard-shell">
+      <aside class="leader-card">
+        <div class="leader-head">
+          <img class="headshot" id="leader-headshot" alt="Leader headshot">
+          <div>
+            <p class="leader-rank">Leader in frame</p>
+            <h2 class="leader-name" id="leader-name">-</h2>
+            <p class="leader-team" id="leader-team">-</p>
+          </div>
+        </div>
 
-    <section class="chart-stage">
-      <p class="chart-title">End-of-season career scoring leaderboard</p>
-      <div id="chart"></div>
+        <div class="leader-stat-grid">
+          <article class="leader-stat">
+            <p class="leader-stat-label">Career points</p>
+            <p class="leader-stat-value" id="leader-points">-</p>
+            <p class="leader-stat-detail" id="leader-rank-detail">-</p>
+          </article>
+          <article class="leader-stat">
+            <p class="leader-stat-label">Season points</p>
+            <p class="leader-stat-value" id="leader-season-points">-</p>
+            <p class="leader-stat-detail" id="leader-season-detail">-</p>
+          </article>
+        </div>
+
+        <p class="summary-note" id="leader-summary-note">-</p>
+      </aside>
+
+      <div class="chart-stage">
+        <p class="chart-title">End-of-season career scoring leaderboard</p>
+        <div id="chart"></div>
+      </div>
     </section>
   </main>
 
   <script>
     const chart = echarts.init(document.getElementById('chart'));
     const API_URL = '/api/reports/career-points-race';
-    const PLAY_INTERVAL_MS = 1300;
-    const COLOR_PALETTE = ['#b96c27', '#c67f35', '#d29347', '#dda85f', '#e7bc78', '#9c5721', '#7f451d', '#c48c5f'];
+    const DEFAULT_HEADSHOT = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+        <rect width="120" height="120" rx="24" fill="#f4e9d2"/>
+        <circle cx="60" cy="42" r="20" fill="#c8a97a"/>
+        <path d="M24 103c8-23 28-35 36-35s28 12 36 35" fill="#c8a97a"/>
+      </svg>
+    `);
+    const TEAM_COLORS = {
+      ATL: '#E03A3E', BOS: '#007A33', BKN: '#000000', CHA: '#1D1160', CHI: '#CE1141', CLE: '#6F263D',
+      DAL: '#00538C', DEN: '#0E2240', DET: '#C8102E', GSW: '#1D428A', HOU: '#CE1141', IND: '#002D62',
+      LAC: '#C8102E', LAL: '#552583', MEM: '#5D76A9', MIA: '#98002E', MIL: '#00471B', MIN: '#0C2340',
+      NOP: '#0C2340', NYK: '#F58426', OKC: '#007AC1', ORL: '#0077C0', PHI: '#006BB6', PHX: '#1D1160',
+      POR: '#E03A3E', SAC: '#5A2D81', SAS: '#C4CED4', TOR: '#CE1141', UTA: '#002B5C', WAS: '#002B5C',
+      SEA: '#00653A', NJN: '#002A60', NOH: '#0C2340', NOK: '#0C2340', VAN: '#00B2A9', CHH: '#00788C',
+      PHW: '#1D428A', SFW: '#F9A01B', CIN: '#6F263D', BUF: '#1D428A', KCK: '#C8102E', MNL: '#552583',
+      SYR: '#F58426', STL: '#C8102E', ROC: '#CE1141', SDC: '#C8102E', BAL: '#000000', FTW: '#1D428A'
+    };
 
     const state = {
       seasons: [],
@@ -404,10 +512,11 @@
       frameIndex: 0,
       topN: 12,
       highlightPlayerId: null,
-      playing: false,
+      playing: true,
       timerId: null,
       backendSource: '',
       backendDetail: '',
+      playIntervalMs: 1300,
     };
 
     const elements = {
@@ -419,16 +528,20 @@
       seasonCurrent: document.getElementById('season-current'),
       seasonEnd: document.getElementById('season-end'),
       playButton: document.getElementById('play-button'),
+      restartButton: document.getElementById('restart-button'),
       topN: document.getElementById('top-n'),
+      playSpeed: document.getElementById('play-speed'),
       highlightPlayerId: document.getElementById('highlight-player-id'),
       summaryNote: document.getElementById('summary-note'),
       statusBox: document.getElementById('status-box'),
+      leaderHeadshot: document.getElementById('leader-headshot'),
       leaderName: document.getElementById('leader-name'),
-      leaderDetail: document.getElementById('leader-detail'),
+      leaderTeam: document.getElementById('leader-team'),
       leaderPoints: document.getElementById('leader-points'),
       leaderRankDetail: document.getElementById('leader-rank-detail'),
-      playersShown: document.getElementById('players-shown'),
-      playersShownDetail: document.getElementById('players-shown-detail'),
+      leaderSeasonPoints: document.getElementById('leader-season-points'),
+      leaderSeasonDetail: document.getElementById('leader-season-detail'),
+      leaderSummaryNote: document.getElementById('leader-summary-note'),
     };
 
     function formatNumber(value) {
@@ -440,34 +553,77 @@
       elements.statusBox.className = isError ? 'status error' : 'status';
     }
 
+    function headshotUrl(playerId) {
+      return `https://cdn.nba.com/headshots/nba/latest/1040x760/${playerId}.png`;
+    }
+
+    function teamColor(teamAbbreviation, offset = 0) {
+      const color = TEAM_COLORS[teamAbbreviation || ''];
+      if (color) {
+        return color;
+      }
+      const fallback = ['#b96c27', '#c57d31', '#d3924b', '#93623d', '#784822', '#4f6a8c'];
+      const key = String(teamAbbreviation || 'NBA').split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      return fallback[(key + offset) % fallback.length];
+    }
+
+    function buildBarGradient(teamAbbreviation, index, isHighlighted) {
+      const primary = isHighlighted ? '#7f1d1d' : teamColor(teamAbbreviation, index);
+      const secondary = isHighlighted ? '#b91c1c' : teamColor(teamAbbreviation, index + 2);
+      return new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+        { offset: 0, color: primary },
+        { offset: 1, color: secondary },
+      ]);
+    }
+
     function stopPlayback() {
       if (state.timerId !== null) {
         window.clearInterval(state.timerId);
         state.timerId = null;
       }
-      state.playing = false;
-      elements.playButton.textContent = 'Play';
     }
 
-    function updateSummary(frame) {
+    function startPlayback() {
+      stopPlayback();
+      if (!state.playing || !state.frames.length) {
+        return;
+      }
+      state.timerId = window.setInterval(advanceFrame, state.playIntervalMs);
+    }
+
+    function syncPlayButton() {
+      elements.playButton.textContent = state.playing ? 'Pause' : 'Play';
+    }
+
+    function updateLeaderCard(frame) {
       const leader = frame.leaders[0];
       if (!leader) {
+        elements.leaderHeadshot.src = DEFAULT_HEADSHOT;
         elements.leaderName.textContent = 'n/a';
-        elements.leaderDetail.textContent = 'No data in this frame';
+        elements.leaderTeam.textContent = 'No frame data';
         elements.leaderPoints.textContent = '0';
-        elements.leaderRankDetail.textContent = 'No ranking available';
-        elements.playersShown.textContent = '0';
-        elements.playersShownDetail.textContent = 'No visible players';
+        elements.leaderRankDetail.textContent = 'No rank available';
+        elements.leaderSeasonPoints.textContent = '0';
+        elements.leaderSeasonDetail.textContent = 'No season points';
+        elements.leaderSummaryNote.textContent = 'No visible leader in this frame.';
         return;
       }
 
+      elements.leaderHeadshot.src = headshotUrl(leader.player_id);
+      elements.leaderHeadshot.onerror = () => {
+        elements.leaderHeadshot.onerror = null;
+        elements.leaderHeadshot.src = DEFAULT_HEADSHOT;
+      };
       elements.leaderName.textContent = leader.player_name;
-      elements.leaderDetail.textContent = `${leader.team_abbreviation || 'NBA'} | season points ${formatNumber(leader.season_points)}`;
+      elements.leaderTeam.textContent = `${leader.team_abbreviation || 'NBA'} | season ${frame.season}`;
       elements.leaderPoints.textContent = formatNumber(leader.career_points);
-      elements.leaderRankDetail.textContent = `Career rank #${leader.career_points_rank} by ${frame.season}`;
-      elements.playersShown.textContent = formatNumber(frame.leaders.length);
-      elements.playersShownDetail.textContent = `Top ${state.topN} frame${state.highlightPlayerId ? ' with highlight' : ''}`;
+      elements.leaderRankDetail.textContent = `Career rank #${leader.career_points_rank} by the end of ${frame.season}`;
+      elements.leaderSeasonPoints.textContent = formatNumber(leader.season_points);
+      elements.leaderSeasonDetail.textContent = leader.season_points > 0 ? 'Points added in this season' : 'Carried forward from prior seasons';
+      elements.leaderSummaryNote.textContent = `${leader.player_name} leads this frame with ${formatNumber(leader.career_points)} career points.`;
     }
+
+    const ALL_PLAYERS = new Map();
 
     function renderFrame() {
       const frame = state.frames[state.frameIndex];
@@ -478,23 +634,29 @@
       const sortedLeaders = [...frame.leaders].sort((left, right) => left.career_points - right.career_points);
       const maxValue = Math.max(...sortedLeaders.map((row) => row.career_points), 1);
 
+      sortedLeaders.forEach(player => {
+        if (!ALL_PLAYERS.has(player.player_id)) {
+          ALL_PLAYERS.set(player.player_id, player.player_name);
+        }
+      });
+
+      const categoryData = sortedLeaders.map((row) => row.player_name);
+
       chart.setOption({
         animationDuration: 0,
-        animationDurationUpdate: PLAY_INTERVAL_MS - 100,
+        animationDurationUpdate: Math.max(state.playIntervalMs - 120, 480),
         animationEasing: 'linear',
         animationEasingUpdate: 'linear',
-        grid: { left: 148, right: 72, top: 48, bottom: 48 },
+        grid: { left: 148, right: 70, top: 42, bottom: 44 },
         xAxis: {
           type: 'value',
           max: maxValue * 1.08,
           splitNumber: 5,
           axisLabel: {
-            color: '#7a6653',
-            formatter(value) {
-              return formatNumber(value);
-            },
+            color: '#746351',
+            formatter(value) { return formatNumber(value); },
           },
-          splitLine: { lineStyle: { color: 'rgba(109, 84, 56, 0.12)' } },
+          splitLine: { lineStyle: { color: 'rgba(122, 91, 56, 0.12)' } },
         },
         yAxis: {
           type: 'category',
@@ -503,11 +665,11 @@
           axisTick: { show: false },
           axisLine: { show: false },
           axisLabel: {
-            color: '#30261f',
+            color: '#2f261f',
             fontSize: 14,
             margin: 16,
           },
-          data: sortedLeaders.map((row) => row.player_name),
+          data: categoryData,
         },
         tooltip: {
           trigger: 'item',
@@ -529,13 +691,13 @@
         graphic: [
           {
             type: 'text',
-            right: 28,
+            right: 26,
             bottom: 16,
             z: 100,
             style: {
               text: frame.season,
-              fill: 'rgba(184, 106, 36, 0.18)',
-              font: '700 94px Georgia, Times New Roman, serif',
+              fill: 'rgba(173, 100, 37, 0.17)',
+              font: '700 96px Georgia, Times New Roman, serif',
             },
           },
         ],
@@ -543,29 +705,30 @@
           {
             type: 'bar',
             realtimeSort: true,
-            barCategoryGap: '28%',
-            data: sortedLeaders.map((row, index) => ({
-              value: row.career_points,
-              raw: row,
-              itemStyle: {
-                color: state.highlightPlayerId && row.player_id === state.highlightPlayerId
-                  ? '#7f1d1d'
-                  : COLOR_PALETTE[index % COLOR_PALETTE.length],
-                borderRadius: [0, 10, 10, 0],
-              },
-            })),
+            barCategoryGap: '26%',
+            data: sortedLeaders.map((row, index) => {
+              const isHighlighted = Boolean(state.highlightPlayerId) && row.player_id === state.highlightPlayerId;
+              return {
+                value: [row.career_points, row.player_name, row.player_id],
+                raw: row,
+                itemStyle: {
+                  color: buildBarGradient(row.team_abbreviation, index, isHighlighted),
+                  borderRadius: [0, 10, 10, 0],
+                  shadowBlur: isHighlighted ? 12 : 0,
+                  shadowColor: isHighlighted ? 'rgba(127, 29, 29, 0.28)' : 'transparent',
+                },
+              };
+            }),
             label: {
               show: true,
               position: 'right',
               valueAnimation: true,
-              color: '#3f3024',
+              color: '#3c2f25',
               fontSize: 13,
+              fontWeight: 700,
               formatter(params) {
-                return formatNumber(params.value);
+                return formatNumber(params.value[0]);
               },
-            },
-            emphasis: {
-              focus: 'series',
             },
           },
         ],
@@ -573,7 +736,7 @@
 
       elements.seasonFocus.textContent = `Season frame: ${frame.season}`;
       elements.seasonCurrent.textContent = frame.season;
-      updateSummary(frame);
+      updateLeaderCard(frame);
     }
 
     async function fetchPayload() {
@@ -613,9 +776,13 @@
         elements.seasonEnd.textContent = state.seasons[state.seasons.length - 1] || '-';
 
         renderFrame();
+        syncPlayButton();
+        startPlayback();
       } catch (error) {
         console.error(error);
         stopPlayback();
+        state.playing = false;
+        syncPlayButton();
         setStatus(`Unable to load career points race data. ${error.message}`, true);
       }
     }
@@ -630,37 +797,41 @@
     }
 
     function togglePlayback() {
-      if (!state.frames.length) {
-        return;
-      }
       state.playing = !state.playing;
-      elements.playButton.textContent = state.playing ? 'Pause' : 'Play';
-      if (state.playing) {
-        state.timerId = window.setInterval(advanceFrame, PLAY_INTERVAL_MS);
-      } else {
-        stopPlayback();
-      }
+      syncPlayButton();
+      startPlayback();
     }
 
     elements.playButton.addEventListener('click', togglePlayback);
+    elements.restartButton.addEventListener('click', () => {
+      state.frameIndex = 0;
+      elements.seasonSlider.value = '0';
+      renderFrame();
+      state.playing = true;
+      syncPlayButton();
+      startPlayback();
+    });
     elements.seasonSlider.addEventListener('input', (event) => {
       state.frameIndex = Number(event.target.value);
       renderFrame();
     });
     elements.topN.addEventListener('change', async (event) => {
       state.topN = Number(event.target.value);
-      stopPlayback();
       await refreshData();
+    });
+    elements.playSpeed.addEventListener('change', (event) => {
+      state.playIntervalMs = Number(event.target.value);
+      startPlayback();
     });
     elements.highlightPlayerId.addEventListener('change', async (event) => {
       const value = event.target.value.trim();
       state.highlightPlayerId = value ? Number(value) : null;
-      stopPlayback();
       await refreshData();
     });
 
     window.addEventListener('resize', () => chart.resize());
 
+    elements.leaderHeadshot.src = DEFAULT_HEADSHOT;
     refreshData();
   </script>
 </body>
