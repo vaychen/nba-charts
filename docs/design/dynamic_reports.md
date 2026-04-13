@@ -32,6 +32,7 @@ Time-based reports usually need four things:
 - strong animation support and very good timeline interactions
 - better than most BI tools when you want custom motion and layout freedom
 - a strong next step if the project later needs a custom frontend
+- now used in this repo for the career-points bar-race report pattern
 
 ### D3.js
 
@@ -52,6 +53,7 @@ Time-based reports usually need four things:
 - FastAPI for reusable data endpoints
 - Dash for the local dynamic report demo
 - Dash + Plotly now also powers a Kobe shot-archive POC backed by `data/sample/kobe_career_shoot_made.csv`
+- ECharts now powers a browser-first NBA career-points bar race backed by PostgreSQL frames from `nba_api`
 - precomputed datasets under `data/processed/` later, sample data for now
 
 ### Long term

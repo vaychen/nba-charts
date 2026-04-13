@@ -46,6 +46,8 @@ uv sync --all-groups
 | Bootstrap local DB | `make db-bootstrap` | `uv run nba-charts-db bootstrap` |
 | Load Kobe sample into DB | `make load-kobe-shots` | `uv run nba-charts-db load-kobe-shots` |
 | Prepare Kobe Postgres backend | `make prepare-kobe-backend` | `uv run nba-charts-db prepare-kobe-backend` |
+| Load career points race | `make load-career-points-race` | `uv run nba-charts-db load-career-points-race` |
+| Prepare career points race | `make prepare-career-points-race` | `uv run nba-charts-db prepare-career-points-race` |
 | Check | `make check` | `uv run ruff check src tests scripts` then `uv run pytest` |
 | Lint | `make lint` | `uv run ruff check src tests scripts` then `uv run mypy src` |
 | Test | `make test` | `uv run pytest` |
